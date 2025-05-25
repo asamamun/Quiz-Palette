@@ -1,0 +1,5 @@
+Online Quiz Application classwise, subjectwise, categorywise with leaderboard and level based(beginner, intermediate, advanced) with result badges. also event based quiz(with specific start datetime) and leaderboards. user can add quiz classwise, subjectwise, categorywise. every quiz should have rating and report option. admin can approve users quizs. admin will create category, class, subject, chapter/topic. also we want payment method mainly bKash and transaction id of bKash.
+
+category: school, admission, job, skill development.
+
+We want complete roadmap of this project. the project will be composer based PHP with MYSQL and BOOTSTRAP. We also need the DB schema.
