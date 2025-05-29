@@ -1,0 +1,50 @@
+quiz-palette/
+├── config/                      # Configuration files
+│   ├── database.php            # Database connection settings
+│   ├── app.php                 # General app settings (e.g., base URL, timezone)
+├── src/                         # Core application logic
+│   ├── Classes/                # PHP classes for business logic
+│   │   ├── User.php            # Handles user-related operations (e.g., login, register)
+│   │   ├── Quiz.php            # Manages quiz creation and retrieval
+│   │   ├── Question.php        # Manages questions and options
+│   │   ├── Result.php          # Handles quiz results and scoring
+│   ├── Database/               # Database interaction
+│   │   ├── Connection.php      # PDO database connection
+│   │   ├── QueryBuilder.php    # Simplifies database queries
+├── public/                      # Publicly accessible files
+│   ├── css/                    # CSS styles
+│   │   ├── style.css           # Main stylesheet
+│   ├── js/                     # JavaScript/jQuery scripts
+│   │   ├── app.js              # Custom jQuery logic for interactivity
+│   │   ├── jquery.min.js       # jQuery library (via CDN or Composer)
+│   ├── assets/                 # Static assets (e.g., images)
+│   ├── index.php               # Entry point for routing
+│   ├── auth/                   # Authentication pages
+│   │   ├── login.php           # Login page
+│   │   ├── register.php        # Registration page
+│   ├── quizzes/                # Quiz-related pages
+│   │   ├── index.php           # List all quizzes
+│   │   ├── create.php          # Create a new quiz
+│   │   ├── show.php            # Display a quiz
+│   │   ├── take.php            # Take a quiz
+│   ├── questions/              # Question-related pages
+│   │   ├── create.php          # Add questions to a quiz
+│   │   └── edit.php            # Edit questions
+│   ├── results/                # Result-related pages
+│   │   ├── index.php           # View user results
+├── templates/                   # Reusable HTML templates
+│   ├── layouts/                # Base layouts
+│   │   ├── main.php            # Main layout with header/footer
+│   ├── partials/               # Reusable components
+│   │   ├── header.php          # Header component
+│   │   ├── footer.php          # Footer component
+├── tests/                       # Unit and integration tests
+│   ├── UserTest.php            # Tests for User class
+│   ├── QuizTest.php            # Tests for Quiz class
+├── vendor/                      # Composer dependencies
+├── doc/                         # Documentation (retained from original)
+│   ├── quizpallete.V2.sql       # Database schema
+├── .htaccess                    # Apache URL rewriting
+├── composer.json                # Composer configuration
+├── composer.lock                # Composer dependency lock file
+├── README.md                    # Project documentation

@@ -1,0 +1,53 @@
+.leaderboard-table th, .leaderboard-table td {
+    vertical-align: middle;
+}
+/* .nav-tabs .nav-link {
+    color: #333;
+} */
+/* .nav-tabs .nav-link.active {
+    background-color:  #096B6B;
+    color: white;
+} */
+.badge-gold {
+    background-color: #FFD700;
+}
+.badge-silver {
+    background-color: #C0C0C0;
+}
+.badge-bronze {
+    background-color: #CD7F32;
+}
+
+    h1 {
+        color: #096B6B;
+    }
+
+    .nav-tabs .nav-link {
+        color: #096B6B;
+    }
+
+    .nav-tabs .nav-link.active {
+        background-color: #096b6bdd;
+        color: white;
+    }
+
+    .table thead th {
+        background-color: #096b6bd4;
+        color: white;
+    }
+
+    /* Sticky bottom navbar */
+    /* #leaderboardTabs {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1030;
+        background-color: white;
+        border-top: 2px solid #096B6B;
+    } */
+
+    body {
+        padding-bottom: 60px; /* Make space for sticky tabs */
+    }
+

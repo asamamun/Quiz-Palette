@@ -1,0 +1,99 @@
+/* Premium styles for Quiz Palette */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Poppins', sans-serif;
+}
+
+.navbar {
+    background: linear-gradient(90deg, #1a3c34, #2c6e49);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: white !important;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #a3e4d7 !important;
+}
+
+.hero {
+    background: url('https://source.unsplash.com/random/1920x600/?education') no-repeat center center/cover;
+    padding: 5rem 0;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.badge-bg-bronze {
+    background-color: #cd7f32;
+    color: white;
+}
+
+.btn-primary, .btn-outline-primary {
+    border-radius: 50px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: #096b6bdd;
+    border: none;
+}
+
+.btn-outline-primary:hover {
+    background: #096b6b;
+    color: white;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.accordion-button {
+    font-weight: 500;
+    color: #096b6bdd;
+}
+
+.accordion-button:not(.collapsed) {
+    background: linear-gradient(90deg, #a3e4d7, #d4efdf);
+}
+
+.breadcrumb {
+    background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+}
+
+.breadcrumb-item a {
+    color: #096b6bdd;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: #096b6b;
+    text-decoration: underline;
+}
+
+.b-example-divider {
+    height: 1rem;
+    background-color: rgba(0, 0, 0, 0.1);
+    border: solid rgba(0, 0, 0, 0.15);
+    border-width: 1px 0;
+    box-shadow: inset 0 0.5em 1.5em rgba(0, 0, 0, 0.1), inset 0 0.125em 0.5em rgba(0, 0, 0, 0.15);
+}

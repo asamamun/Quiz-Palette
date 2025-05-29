@@ -1,0 +1,73 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #096b6bdd;
+}
+
+/* Contact Section */
+/* .contact-section {
+    background-color: rgb(9, 107, 104);
+} */
+
+.card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.contact-icon {
+    padding: 20px;
+    transition: transform 0.3s ease;
+}
+
+.contact-icon:hover {
+    transform: translateY(-5px);
+}
+
+.contact-icon i {
+    color: #096b6bdd;
+}
+
+/* Form Styles */
+.form-control {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #096b6bdd;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    border-color: #096b6bdd;
+    box-shadow: 0 0 0 0.25rem #096b6ba1;
+}
+
+.btn-primary {
+    background-color: #096b6bdd;
+    border: none;
+    padding: 12px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #096b6b;
+}
+
+input[type="checkbox"].form-check-input:checked {
+    background-color: #096b6bdd;
+    border-color: #096b6bdd;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .contact-section {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    
+    .card-body {
+        padding: 2rem !important;
+    }
+    
+}

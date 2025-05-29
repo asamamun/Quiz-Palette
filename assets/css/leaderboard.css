@@ -1,0 +1,53 @@
+/* Leaderboard table cell alignment */
+.leaderboard-table th, .leaderboard-table td {
+    vertical-align: middle;
+}
+
+/* Badge colors */
+.badge-gold {
+    background-color: #FFD700;
+}
+.badge-silver {
+    background-color: #C0C0C0;
+}
+.badge-bronze {
+    background-color: #CD7F32;
+}
+
+/* Heading */
+h1 {
+    color: #096B68;
+}
+
+/* Nav tabs color */
+.nav-tabs .nav-link {
+    color: #096B68;
+}
+.nav-tabs .nav-link.active {
+    background-color: #075e5b;
+    color: white;
+}
+
+/* Table headers */
+.table thead th {
+    background-color: #096B68;
+    color: white;
+}
+
+/* Optional: Sticky bottom navbar styling (if needed) */
+/*
+#leaderboardTabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background-color: white;
+    border-top: 2px solid #096B68;
+}
+*/
+
+/* Make room for sticky tab bar if enabled */
+body {
+    padding-bottom: 60px;
+}
