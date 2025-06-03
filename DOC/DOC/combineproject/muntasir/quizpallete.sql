@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 29, 2025 at 11:00 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: May 31, 2025 at 10:20 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -44,63 +44,122 @@ CREATE TABLE `badges` (
 --
 -- Table structure for table `categories`
 --
+
 CREATE TABLE `categories` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `slug` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
   `icon` varchar(100) DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `slug_unique` (`slug`)
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `icon`, `status`, `created_by`, `created_at`) VALUES
+(1, 'electrical', 'uyxdfgh', 'uszdfgyhu', 'hhhhhhhhhh', 'active', 1, '2025-05-31 15:25:50'),
+(2, 'ssc', 'cgvjhb', 'dfgbn', 'erty', 'active', 1, '2025-05-31 19:19:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `classes`
+--
 
 CREATE TABLE `classes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `slug` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `slug_unique` (`slug`),
-  FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE CASCADE
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `classes`
+--
 
-CREATE TABLE `subjects` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `class_id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `slug` varchar(100) NOT NULL,
-  `description` text DEFAULT NULL,
-  `status` enum('active','inactive') DEFAULT 'active',
-  `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `slug_unique` (`slug`),
-  FOREIGN KEY (`class_id`) REFERENCES `classes`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `classes` (`id`, `category_id`, `name`, `slug`, `description`, `status`, `created_by`, `created_at`) VALUES
+(1, 1, '9 to 10', 'srgbcv', 'aegsb', 'active', 1, '2025-05-31 15:47:51'),
+(2, 2, '10', 'ythgvj', 'kuhjbn', 'active', 1, '2025-05-31 19:19:22');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `events`
+--
 
 CREATE TABLE `events` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `name` varchar(150) NOT NULL,
   `slug` varchar(150) NOT NULL,
   `event_date` date DEFAULT NULL,
   `description` text DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `slug_unique` (`slug`)
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`id`, `name`, `slug`, `event_date`, `description`, `status`, `created_by`, `created_at`) VALUES
+(1, 'emni', 'qwertghj', NULL, 'werty', 'inactive', 1, '2025-05-31 16:46:28');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `exams`
+--
+
+CREATE TABLE `exams` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `category_id` int(11) DEFAULT NULL,
+  `class_id` int(11) DEFAULT NULL,
+  `subject_id` int(11) DEFAULT NULL,
+  `event_id` int(11) DEFAULT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exams`
+--
+
+INSERT INTO `exams` (`id`, `title`, `slug`, `description`, `duration`, `status`, `category_id`, `class_id`, `subject_id`, `event_id`, `created_by`, `created_at`) VALUES
+(1, 'emni', 'fhgjk', 'fyguhjl;', 50, 'active', 1, 1, 4, NULL, 1, '2025-06-01 01:10:58'),
+(2, 'gvhjbjnk', 'gvhbjnk', 'gvhbjnk', 50, 'active', 2, 2, 5, NULL, 1, '2025-06-01 01:21:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `exam_quizzes`
+--
+
+CREATE TABLE `exam_quizzes` (
+  `exam_id` int(11) NOT NULL,
+  `quiz_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exam_quizzes`
+--
+
+INSERT INTO `exam_quizzes` (`exam_id`, `quiz_id`) VALUES
+(1, 2),
+(2, 3);
 
 -- --------------------------------------------------------
 
@@ -215,32 +274,27 @@ CREATE TABLE `question_tags` (
 
 CREATE TABLE `quizzes` (
   `id` int(11) NOT NULL,
-  `title` varchar(200) NOT NULL,
-  `slug` varchar(200) NOT NULL,
-  `description` text DEFAULT NULL,
-  `category_id` int(11) NOT NULL,
+  `question` text NOT NULL,
+  `option_a` varchar(255) DEFAULT NULL,
+  `option_b` varchar(255) DEFAULT NULL,
+  `option_c` varchar(255) DEFAULT NULL,
+  `option_d` varchar(255) DEFAULT NULL,
+  `correct_option` enum('a','b','c','d') DEFAULT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `category_id` int(11) DEFAULT NULL,
   `class_id` int(11) DEFAULT NULL,
   `subject_id` int(11) DEFAULT NULL,
-  `topic_id` int(11) DEFAULT NULL,
-  `level` enum('beginner','intermediate','advanced') NOT NULL,
-  `type` enum('general','event') DEFAULT 'general',
-  `total_questions` int(11) NOT NULL DEFAULT 0,
-  `duration` int(11) NOT NULL,
-  `passing_marks` int(11) NOT NULL,
-  `max_attempts` int(11) DEFAULT 1,
-  `is_paid` tinyint(1) DEFAULT 0,
-  `price` decimal(10,2) DEFAULT 0.00,
-  `instructions` text DEFAULT NULL,
-  `start_datetime` timestamp NULL DEFAULT NULL,
-  `end_datetime` timestamp NULL DEFAULT NULL,
-  `status` enum('draft','pending','approved','rejected') DEFAULT 'draft',
-  `is_featured` tinyint(1) DEFAULT 0,
-  `created_by` int(11) NOT NULL,
-  `approved_by` int(11) DEFAULT NULL,
-  `approved_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `event_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `quizzes`
+--
+
+INSERT INTO `quizzes` (`id`, `question`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `status`, `category_id`, `class_id`, `subject_id`, `event_id`) VALUES
+(1, 'what is the right ans?', 'aa', 'bb', 'cc', 'dd', 'b', 'active', NULL, NULL, NULL, NULL),
+(2, 'If 1=3\\r\\n\\r\\n2=3\\r\\n\\r\\n3=5\\r\\n\\r\\n4=4\\r\\n\\r\\n5=4\\r\\n\\r\\nThen, 6=?', '5', '4', '3', '2', 'c', 'active', 1, 1, 4, NULL),
+(3, '2+2=?', '5', '22', '2', '4', 'd', 'active', 2, 2, 4, NULL);
 
 -- --------------------------------------------------------
 
@@ -328,8 +382,17 @@ CREATE TABLE `subjects` (
   `description` text DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `category_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `subjects`
+--
+
+INSERT INTO `subjects` (`id`, `class_id`, `name`, `slug`, `description`, `status`, `created_by`, `created_at`, `category_id`) VALUES
+(4, 1, 'math', 'afdgb', 'sdgf', 'active', 1, '2025-05-31 18:16:45', 1),
+(5, 2, 'math', 'srgvhjb', 'gvjhbn', 'active', 1, '2025-05-31 19:19:43', 2);
 
 -- --------------------------------------------------------
 
@@ -373,7 +436,7 @@ CREATE TABLE `topics` (
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -385,14 +448,17 @@ CREATE TABLE `users` (
   `status` enum('active','inactive','banned') DEFAULT 'active',
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `first_name`, `last_name`, `phone`, `avatar`, `role`, `status`, `email_verified_at`, `created_at`, `updated_at`) VALUES
+(0, 'muntasir', 'muntasirmahmudcn42@gmail.com', '$2y$10$9.Uhp1HPmtWkE4TFTtWmg.U7yId68nHzXHNJhGE3.m/WNawEj6lVK', 'Muntasir', 'Mahmud', '01700000000', 'https://www.google.com', 'admin', 'active', NULL, '2025-05-31 14:29:22', '2025-05-31 14:32:59'),
 (1, 'mamun', 'mamun@gmail.com', '$2y$10$ir17G8h..cn8aUHbZ2jVuuW5VNmXpBNqb1.gTGcn1CcRlJcBtl4Uy', 'ASA', 'MAMUN', '34568975984u', 'http://google.com', 'admin', 'active', NULL, '2025-05-29 04:16:21', '2025-05-29 04:59:17');
 
 -- --------------------------------------------------------
@@ -458,16 +524,40 @@ ALTER TABLE `badges`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `slug` (`slug`),
-  ADD KEY `created_by` (`created_by`);
+  ADD UNIQUE KEY `slug_unique` (`slug`);
 
 --
 -- Indexes for table `classes`
 --
 ALTER TABLE `classes`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_class_category` (`category_id`,`slug`),
+  ADD UNIQUE KEY `slug_unique` (`slug`),
+  ADD KEY `category_id` (`category_id`);
+
+--
+-- Indexes for table `events`
+--
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `slug_unique` (`slug`);
+
+--
+-- Indexes for table `exams`
+--
+ALTER TABLE `exams`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `subject_id` (`subject_id`),
+  ADD KEY `event_id` (`event_id`),
   ADD KEY `created_by` (`created_by`);
+
+--
+-- Indexes for table `exam_quizzes`
+--
+ALTER TABLE `exam_quizzes`
+  ADD PRIMARY KEY (`exam_id`,`quiz_id`),
+  ADD KEY `quiz_id` (`quiz_id`);
 
 --
 -- Indexes for table `leaderboards`
@@ -523,13 +613,10 @@ ALTER TABLE `question_tags`
 --
 ALTER TABLE `quizzes`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `slug` (`slug`),
-  ADD KEY `category_id` (`category_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `subject_id` (`subject_id`),
-  ADD KEY `topic_id` (`topic_id`),
-  ADD KEY `created_by` (`created_by`),
-  ADD KEY `approved_by` (`approved_by`);
+  ADD KEY `fk_quiz_category` (`category_id`),
+  ADD KEY `fk_quiz_class` (`class_id`),
+  ADD KEY `fk_quiz_subject` (`subject_id`),
+  ADD KEY `fk_quiz_event` (`event_id`);
 
 --
 -- Indexes for table `quiz_analytics`
@@ -568,8 +655,8 @@ ALTER TABLE `quiz_reports`
 --
 ALTER TABLE `subjects`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_subject_class` (`class_id`,`slug`),
-  ADD KEY `created_by` (`created_by`);
+  ADD UNIQUE KEY `slug_unique` (`slug`),
+  ADD KEY `class_id` (`class_id`);
 
 --
 -- Indexes for table `subscriptions`
@@ -614,289 +701,86 @@ ALTER TABLE `user_badges`
   ADD KEY `quiz_attempt_id` (`quiz_attempt_id`);
 
 --
--- Indexes for table `user_progress`
---
-ALTER TABLE `user_progress`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `category_id` (`category_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `subject_id` (`subject_id`),
-  ADD KEY `topic_id` (`topic_id`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
-
---
--- AUTO_INCREMENT for table `badges`
---
-ALTER TABLE `badges`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `leaderboards`
+-- AUTO_INCREMENT for table `events`
 --
-ALTER TABLE `leaderboards`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `notifications`
+-- AUTO_INCREMENT for table `exams`
 --
-ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `payments`
---
-ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `questions`
---
-ALTER TABLE `questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `question_options`
---
-ALTER TABLE `question_options`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `question_tags`
---
-ALTER TABLE `question_tags`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `exams`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `quiz_analytics`
---
-ALTER TABLE `quiz_analytics`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `quiz_attempts`
---
-ALTER TABLE `quiz_attempts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `quiz_ratings`
---
-ALTER TABLE `quiz_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `quiz_reports`
---
-ALTER TABLE `quiz_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `topics`
---
-ALTER TABLE `topics`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `user_answers`
---
-ALTER TABLE `user_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_badges`
---
-ALTER TABLE `user_badges`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_progress`
---
-ALTER TABLE `user_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `categories`
---
-ALTER TABLE `categories`
-  ADD CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
-
---
 -- Constraints for table `classes`
 --
 ALTER TABLE `classes`
-  ADD CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `leaderboards`
+-- Constraints for table `exams`
 --
-ALTER TABLE `leaderboards`
-  ADD CONSTRAINT `leaderboards_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `leaderboards_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  ADD CONSTRAINT `leaderboards_ibfk_3` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`),
-  ADD CONSTRAINT `leaderboards_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`);
+ALTER TABLE `exams`
+  ADD CONSTRAINT `exams_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `exams_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `exams_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `exams_ibfk_4` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `exams_ibfk_5` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `notifications`
+-- Constraints for table `exam_quizzes`
 --
-ALTER TABLE `notifications`
-  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `payments`
---
-ALTER TABLE `payments`
-  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`),
-  ADD CONSTRAINT `payments_ibfk_3` FOREIGN KEY (`verified_by`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `questions`
---
-ALTER TABLE `questions`
-  ADD CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `question_options`
---
-ALTER TABLE `question_options`
-  ADD CONSTRAINT `question_options_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `question_tags`
---
-ALTER TABLE `question_tags`
-  ADD CONSTRAINT `question_tags_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE;
+ALTER TABLE `exam_quizzes`
+  ADD CONSTRAINT `exam_quizzes_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `exam_quizzes_ibfk_2` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  ADD CONSTRAINT `quizzes_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  ADD CONSTRAINT `quizzes_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`),
-  ADD CONSTRAINT `quizzes_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`),
-  ADD CONSTRAINT `quizzes_ibfk_4` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`),
-  ADD CONSTRAINT `quizzes_ibfk_5` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `quizzes_ibfk_6` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `quiz_analytics`
---
-ALTER TABLE `quiz_analytics`
-  ADD CONSTRAINT `quiz_analytics_ibfk_1` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`);
-
---
--- Constraints for table `quiz_attempts`
---
-ALTER TABLE `quiz_attempts`
-  ADD CONSTRAINT `quiz_attempts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `quiz_attempts_ibfk_2` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`);
-
---
--- Constraints for table `quiz_ratings`
---
-ALTER TABLE `quiz_ratings`
-  ADD CONSTRAINT `quiz_ratings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `quiz_ratings_ibfk_2` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`);
-
---
--- Constraints for table `quiz_reports`
---
-ALTER TABLE `quiz_reports`
-  ADD CONSTRAINT `quiz_reports_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `quiz_reports_ibfk_2` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`),
-  ADD CONSTRAINT `quiz_reports_ibfk_3` FOREIGN KEY (`resolved_by`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_quiz_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_quiz_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_quiz_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_quiz_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `subjects`
 --
 ALTER TABLE `subjects`
-  ADD CONSTRAINT `subjects_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `subjects_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  ADD CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `subscriptions_ibfk_2` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`);
-
---
--- Constraints for table `topics`
---
-ALTER TABLE `topics`
-  ADD CONSTRAINT `topics_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `topics_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `user_answers`
---
-ALTER TABLE `user_answers`
-  ADD CONSTRAINT `user_answers_ibfk_1` FOREIGN KEY (`attempt_id`) REFERENCES `quiz_attempts` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`),
-  ADD CONSTRAINT `user_answers_ibfk_3` FOREIGN KEY (`selected_option_id`) REFERENCES `question_options` (`id`);
-
---
--- Constraints for table `user_badges`
---
-ALTER TABLE `user_badges`
-  ADD CONSTRAINT `user_badges_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `user_badges_ibfk_2` FOREIGN KEY (`badge_id`) REFERENCES `badges` (`id`),
-  ADD CONSTRAINT `user_badges_ibfk_3` FOREIGN KEY (`quiz_attempt_id`) REFERENCES `quiz_attempts` (`id`);
-
---
--- Constraints for table `user_progress`
---
-ALTER TABLE `user_progress`
-  ADD CONSTRAINT `user_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `user_progress_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  ADD CONSTRAINT `user_progress_ibfk_3` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`),
-  ADD CONSTRAINT `user_progress_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`),
-  ADD CONSTRAINT `user_progress_ibfk_5` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`);
+  ADD CONSTRAINT `subjects_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

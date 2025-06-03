@@ -1,0 +1,96 @@
+<?php include "includes/header.php"?>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/contact.css">
+
+
+    <!-- Contact Form Section -->
+    <section class="contact-section py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-4">Contact Us</h2>
+                            <p class="text-center mb-5">Have questions? Fill out the form below and we'll get back to you as soon as possible.</p>
+                            
+                            <form id="contactForm" action="process_contact.php" method="POST">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                        <div class="invalid-feedback">Please enter your name.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Subject</label>
+                                    <input type="text" class="form-control" id="subject" name="subject" required>
+                                    <div class="invalid-feedback">Please enter a subject.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Message</label>
+                                    <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                                    <div class="invalid-feedback">Please enter your message.</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="subscribe" name="subscribe" style="accent-color: #096b6bdd;">
+
+                                    <label class="form-check-label" for="subscribe">Subscribe to our newsletter</label>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                                </div>
+                                <div id="formResponse" class="d-none alert alert-success mt-3"></div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Info Section -->
+    <section class="contact-info bg-light py-5">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                        <h4>Address</h4>
+                        <p>123 Learning Street<br>Knowledge City, 10101</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone fa-3x mb-3"></i>
+                        <h4>Phone</h4>
+                        <p>+1 (555) 123-4567<br>Mon-Fri, 9am-5pm</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope fa-3x mb-3"></i>
+                        <h4>Email</h4>
+                        <p>info@quizmaster.com<br>support@quizmaster.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="js/contact.js"></script>
+</body>
+</html>
