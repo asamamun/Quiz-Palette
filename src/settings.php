@@ -9,10 +9,10 @@ if (!function_exists('settings')) {
             'logo'=>$root."admin/assets/img/logo.svg",
             'homepage'=> $root,
             'adminpage'=>$root.'admin/',
-            'hostname'=> 'localhost',
-            'user'=> 'root',
-            'password'=> '',
-            'database'=> 'quizpallete'
+            'hostname'=> config('db.host')??'localhost',
+            'user'=> config('db.user')??'root',
+            'password'=> config('db.password')??'',
+            'database'=> config('db.database')??'quizpallete'
         ];
     }
 }

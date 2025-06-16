@@ -1,13 +1,12 @@
 <?php
 require __DIR__."/../vendor/autoload.php";
 require __DIR__."/admincheck.php";
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "quizpallete";
-
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) die("Connection failed: " . htmlspecialchars($conn->connect_error));
+$conn = new mysqli(
+    settings()['hostname'], 
+    settings()['user'], 
+    settings()['password'], 
+    settings()['database']
+);
 
 // Enable error reporting for debugging
 ini_set('display_errors', 1);
@@ -568,13 +567,78 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY created_at DESC");
 $classes = $conn->query("SELECT c.*, cat.name AS category_name FROM classes c LEFT JOIN categories cat ON c.category_id = cat.id ORDER BY c.id DESC");
 $subjects = $conn->query("SELECT s.*, c.name AS class_name, cat.name AS category_name FROM subjects s LEFT JOIN classes c ON s.class_id = c.id LEFT JOIN categories cat ON s.category_id = cat.id ORDER BY s.id DESC");
 $events = $conn->query("SELECT * FROM events ORDER BY id DESC");
-$quizzes = $conn->query("SELECT q.*, cat.name AS category_name, cl.name AS class_name, s.name AS subject_name, e.name AS event_name 
+/* $quizzes = $conn->query("SELECT q.*, cat.name AS category_name, cl.name AS class_name, s.name AS subject_name, e.name AS event_name 
                          FROM quizzes q 
                          LEFT JOIN categories cat ON q.category_id = cat.id 
                          LEFT JOIN classes cl ON q.class_id = cl.id 
                          LEFT JOIN subjects s ON q.subject_id = s.id 
                          LEFT JOIN events e ON q.event_id = e.id 
-                         ORDER BY q.id DESC");
+                         ORDER BY q.id DESC"); */
+/*                          echo "<pre>";
+                         var_dump($quizzes->fetch_all(MYSQLI_ASSOC));
+                         echo "</pre>";
+                         exit; */
+$query = "SELECT 
+    q.id as quiz_id,
+    q.title as quiz_title,
+    q.description as quiz_description,
+    q.status as quiz_status,
+    qs.id as question_id,
+    qs.question_text,
+    qs.question_type,
+    qs.marks,
+    qs.difficulty,
+    qo.id as option_id,
+    qo.option_text,
+    qo.is_correct,
+    qo.order_index
+FROM quizzes q
+LEFT JOIN questions qs ON q.id = qs.quiz_id
+LEFT JOIN question_options qo ON qs.id = qo.question_id
+WHERE q.status = 'active' AND qs.status = 'active'
+ORDER BY q.id, qs.order_index, qo.order_index";
+
+$quizzes = $conn->query($query);
+// Organize data by quiz and question
+$quiz_data = [];
+if ($quizzes->num_rows > 0) {
+    while ($row = $quizzes->fetch_assoc()) {
+        $quiz_id = $row['quiz_id'];
+        $question_id = $row['question_id'];
+        
+        // Initialize quiz if not exists
+        if (!isset($quiz_data[$quiz_id])) {
+            $quiz_data[$quiz_id] = [
+                'title' => $row['quiz_title'],
+                'description' => $row['quiz_description'],
+                'status' => $row['quiz_status'],
+                'questions' => []
+            ];
+        }
+        
+        // Initialize question if not exists
+        if (!isset($quiz_data[$quiz_id]['questions'][$question_id])) {
+            $quiz_data[$quiz_id]['questions'][$question_id] = [
+                'question_text' => $row['question_text'],
+                'question_type' => $row['question_type'],
+                'marks' => $row['marks'],
+                'difficulty' => $row['difficulty'],
+                'options' => []
+            ];
+        }
+        
+        // Add option to question
+        if ($row['option_id']) {
+            $quiz_data[$quiz_id]['questions'][$question_id]['options'][] = [
+                'option_text' => $row['option_text'],
+                'is_correct' => $row['is_correct'],
+                'order_index' => $row['order_index']
+            ];
+        }
+    }
+}
+
+
 $pending_questions = $conn->query("SELECT pq.*, cat.name AS category_name, cl.name AS class_name, s.name AS subject_name, e.name AS event_name, COALESCE(u.first_name, u.username) AS display_name 
                                    FROM pending_questions pq 
                                    LEFT JOIN categories cat ON pq.category_id = cat.id 
@@ -1116,8 +1180,8 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                                         <div class="row mb-3">
                                             <div class="col-md-3">
                                                 <label class="form-label">Category</label>
-                                                <select name="category_id" class="form-select">
-                                                    <option value="">Select Category</option>
+                                                <select name="category_id" id="aq_category_id" class="form-select">
+                                                    <option value="-1">Select Category</option>
                                                     <?php while ($cat = $allCategories->fetch_assoc()): ?>
                                                         <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
                                                     <?php endwhile; ?>
@@ -1126,32 +1190,30 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">Class</label>
-                                                <select name="class_id" class="form-select">
+                                                <select name="class_id" id="aq_class_id" class="form-select">
                                                     <option value="">Select Class</option>
-                                                    <?php while ($cl = $allClasses->fetch_assoc()): ?>
-                                                        <option value="<?= $cl['id'] ?>"><?= htmlspecialchars($cl['name']) ?></option>
-                                                    <?php endwhile; ?>
-                                                    <?php $allClasses->data_seek(0); ?>
+                                                    
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">Subject</label>
-                                                <select name="subject_id" class="form-select">
+                                                <select name="subject_id" id="aq_subject_id" class="form-select">
                                                     <option value="">Select Subject</option>
-                                                    <?php while ($sub = $allSubjects->fetch_assoc()): ?>
-                                                        <option value="<?= $sub['id'] ?>"><?= htmlspecialchars($sub['name']) ?></option>
-                                                    <?php endwhile; ?>
-                                                    <?php $allSubjects->data_seek(0); ?>
+                                                    
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">Event</label>
-                                                <select name="event_id" class="form-select">
+                                                <select name="event_id" id="aq_event_id" class="form-select">
                                                     <option value="">Select Event</option>
-                                                    <?php while ($evt = $allEvents->fetch_assoc()): ?>
-                                                        <option value="<?= $evt['id'] ?>"><?= htmlspecialchars($evt['name']) ?></option>
-                                                    <?php endwhile; ?>
-                                                    <?php $allEvents->data_seek(0); ?>
+                                                    <!-- show events from $events variable -->
+                                                        <?php
+                                                        while ($event = $allEvents->fetch_assoc()): ?>
+                                                            <option value="<?= $event['id'] ?>"><?= htmlspecialchars($event['name']) ?></option>
+                                                        <?php endwhile;
+                                                        $events->data_seek(0);
+                                                        ?>
+                                                    
                                                 </select>
                                             </div>
                                         </div>
@@ -1204,97 +1266,79 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                         </div>
 
                         <h4>Existing Quizzes</h4>
-                        <div class="table-responsive mb-4">
-                            <table class="table table-bordered align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Category</th>
-                                        <th>Class</th>
-                                        <th>Subject</th>
-                                        <th>Event</th>
-                                        <th>Question</th>
-                                        <th>Option A</th>
-                                        <th>Option B</th>
-                                        <th>Option C</th>
-                                        <th>Option D</th>
-                                        <th>Correct Option</th>
-                                        <th>Status</th>
-                                        <th style="min-width:120px;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php while ($row = $quizzes->fetch_assoc()): ?>
-                                        <tr>
-                                            <form method="POST" class="form-inline d-flex flex-wrap gap-2 align-items-center">
-                                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                                <td>
-                                                    <select name="category_id" class="form-select form-select-sm">
-                                                        <option value="">None</option>
-                                                        <?php while ($cat = $allCategories->fetch_assoc()): ?>
-                                                            <option value="<?= $cat['id'] ?>" <?= $row['category_id'] == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
-                                                        <?php endwhile; ?>
-                                                        <?php $allCategories->data_seek(0); ?>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select name="class_id" class="form-select form-select-sm">
-                                                        <option value="">None</option>
-                                                        <?php while ($cl = $allClasses->fetch_assoc()): ?>
-                                                            <option value="<?= $cl['id'] ?>" <?= $row['class_id'] == $cl['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cl['name']) ?></option>
-                                                        <?php endwhile; ?>
-                                                        <?php $allClasses->data_seek(0); ?>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select name="subject_id" class="form-select form-select-sm">
-                                                        <option value="">None</option>
-                                                        <?php while ($sub = $allSubjects->fetch_assoc()): ?>
-                                                            <option value="<?= $sub['id'] ?>" <?= $row['subject_id'] == $sub['id'] ? 'selected' : '' ?>><?= htmlspecialchars($sub['name']) ?></option>
-                                                        <?php endwhile; ?>
-                                                        <?php $allSubjects->data_seek(0); ?>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select name="event_id" class="form-select form-select-sm">
-                                                        <option value="">None</option>
-                                                        <?php while ($evt = $allEvents->fetch_assoc()): ?>
-                                                            <option value="<?= $evt['id'] ?>" <?= $row['event_id'] == $evt['id'] ? 'selected' : '' ?>><?= htmlspecialchars($evt['name']) ?></option>
-                                                        <?php endwhile; ?>
-                                                        <?php $allEvents->data_seek(0); ?>
-                                                    </select>
-                                                </td>
-                                                <td><textarea name="question" class="form-control form-control-sm" rows="2"><?= htmlspecialchars($row['question']) ?></textarea></td>
-                                                <td><input type="text" name="option_a" value="<?= htmlspecialchars($row['option_a']) ?>" class="form-control form-control-sm"></td>
-                                                <td><input type="text" name="option_b" value="<?= htmlspecialchars($row['option_b']) ?>" class="form-control form-control-sm"></td>
-                                                <td><input type="text" name="option_c" value="<?= htmlspecialchars($row['option_c']) ?>" class="form-control form-control-sm"></td>
-                                                <td><input type="text" name="option_d" value="<?= htmlspecialchars($row['option_d']) ?>" class="form-control form-control-sm"></td>
-                                                <td>
-                                                    <select name="correct_option" class="form-select form-select-sm">
-                                                        <option value="a" <?= $row['correct_option'] == 'a' ? 'selected' : '' ?>>Option A</option>
-                                                        <option value="b" <?= $row['correct_option'] == 'b' ? 'selected' : '' ?>>Option B</option>
-                                                        <option value="c" <?= $row['correct_option'] == 'c' ? 'selected' : '' ?>>Option C</option>
-                                                        <option value="d" <?= $row['correct_option'] == 'd' ? 'selected' : '' ?>>Option D</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select name="status" class="form-select form-select-sm">
-                                                        <option value="active" <?= $row['status'] == 'active' ? 'selected' : '' ?>>Active</option>
-                                                        <option value="inactive" <?= $row['status'] == 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                                                    </select>
-                                                </td>
-                                                <td class="d-flex gap-2">
-                                                    <button type="submit" name="edit_quiz" class="btn btn-sm btn-success action-btn">Save</button>
-                                            </form>
-                                                    <form method="POST" onsubmit="return confirm('Delete this quiz?')" class="m-0">
-                                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                                        <button type="submit" name="delete_quiz" class="btn btn-sm btn-danger action-btn">Delete</button>
-                                                    </form>
-                                                </td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
-                            </table>
-                        </div>
+<!--  -->
+<!--  -->
+<h1>Quiz Database - All Quizzes with Answers</h1>
+    
+    <?php if (empty($quiz_data)): ?>
+        <div class="no-data">
+            <p>No active quizzes found in the database.</p>
+        </div>
+    <?php else: ?>
+        <?php foreach ($quiz_data as $quiz_id => $quiz): ?>
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    Quiz #<?php echo $quiz_id; ?>: <?php echo htmlspecialchars($quiz['title']); ?>
+                </div>
+                
+                <?php if (!empty($quiz['description'])): ?>
+                    <div class="quiz-description">
+                        <?php echo htmlspecialchars($quiz['description']); ?>
+                    </div>
+                <?php endif; ?>
+                <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Type</th>
+                            <th>Difficulty</th>
+                            <th>Marks</th>
+                            <th>Options & Answers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($quiz['questions'] as $question_id => $question): ?>
+                            <tr>
+                                <td>
+                                    <div class="question-text">
+                                        Q<?php echo $question_id; ?>: <?php echo htmlspecialchars($question['question_text']); ?>
+                                    </div>
+                                </td>
+                                <td><?php echo ucfirst(str_replace('_', ' ', $question['question_type'])); ?></td>
+                                <td>
+                                    <span class="difficulty <?php echo $question['difficulty']; ?>">
+                                        <?php echo $question['difficulty']; ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="marks"><?php echo $question['marks']; ?> pts</span>
+                                </td>
+                                <td>
+                                    <?php foreach ($question['options'] as $option): ?>
+                                        <div class="option">
+                                            <?php if ($option['is_correct']): ?>
+                                                <span class="correct-answer">
+                                                    ✓ <?php echo htmlspecialchars($option['option_text']); ?> (Correct)
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="wrong-answer">
+                                                    ✗ <?php echo htmlspecialchars($option['option_text']); ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+<!--  -->
+<!--  -->
                     </div>
 
                     <!-- PENDING QUESTIONS -->
@@ -1371,6 +1415,50 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+<script src="<?= settings()['root'] ?>assets/js/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+        /* get classes when category changes start  */
+        $("#aq_category_id").change(function() {
+            var category_id = $(this).val();
+            $("#aq_class_id").empty();
+            $.ajax({
+                url:"<?= settings()['adminpage'] ?>" + "ajax/get_classes.php",
+                method: "POST",
+                data: {
+                    cat_id: category_id
+                },
+                dataType: "json",
+                success: function(response) {
+                    response.data?.forEach(element => {
+                        $("#aq_class_id").append('<option value="' + element.id + '">' + element.name + '</option>');
+                        
+                    });
+                }
+            });
+        });
+        /* get classes when category changes end  */
+        /* get subjects when class changes start  */
+        $("#aq_class_id").change(function() {
+            var class_id = $(this).val();
+            $("#aq_subject_id").empty();
+            $.ajax({
+                url:"<?= settings()['adminpage'] ?>" + "ajax/get_subjects.php",
+                method: "POST",
+                data: {
+                    class_id: class_id
+                },
+                dataType: "json",
+                success: function(response) {
+                    response.data?.forEach(element => {
+                        $("#aq_subject_id").append('<option value="' + element.id + '">' + element.name + '</option>');
+                    });
+                }
+            });
+        });
+        /* get subjects when class changes end  */
+    });
+</script>
 <?php $conn->close(); ?>
 </body>
 </html>
