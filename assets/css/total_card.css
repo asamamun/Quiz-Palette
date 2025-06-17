@@ -1,0 +1,80 @@
+:root {
+    --primary-color: #129990;
+    --accent-color: #90D1CA;
+  }
+
+  body {
+    background-color: #f1f5f9;
+  }
+
+  .ds-stat-card {
+    background-color: var(--primary-color);
+    border-radius: 1rem;
+    color: white;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ds-stat-card::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  .ds-stat-icon {
+    width: 55px;
+    height: 55px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.7rem;
+    animation: pulse 2s infinite ease-in-out;
+  }
+
+  .ds-stat-icon i {
+    font-size: 1.7rem;
+    color: white;
+    animation: bounce 2s infinite ease-in-out;
+  }
+
+  .ds-stat-label {
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .ds-stat-count {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 8px var(--accent-color);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 20px var(--accent-color);
+      transform: scale(1.1);
+    }
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }

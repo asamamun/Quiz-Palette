@@ -49,8 +49,8 @@ $conn->close();
 
         .sidebar {
             background-color: var(--main-color);
-            min-height: 100vh;
-            padding-top: 1rem;
+            /* min-height: 100vh; */
+            /* padding-top: 1rem; */
         }
 
         .nav-link {
@@ -144,7 +144,7 @@ $conn->close();
                         <span class="navbar-brand text-white">Admin</span>
                     </div>
                 </nav>
-                <nav class="nav flex-column p-3">
+                <nav class="nav flex-column">
                     <a class="nav-link text-white active" href="dashboard.php"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
                     <a class="nav-link text-white" data-bs-toggle="collapse" href="#quizSubMenu" role="button" aria-expanded="false">
                         <i class="bi bi-ui-checks-grid me-2"></i>Manage Quizzes
@@ -173,7 +173,7 @@ $conn->close();
                         <span class="navbar-brand text-white d-md-none">Admin</span>
                         <ul class="navbar-nav ms-auto">
                             <li class="nav-item">
-                                <a class="nav-link text-white" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+                                <a class="nav-link text-white" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
                             </li>
                         </ul>
                     </div>

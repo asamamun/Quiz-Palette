@@ -3,8 +3,22 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 $currentPage = basename($_SERVER['SCRIPT_NAME']); 
+require __DIR__."/../vendor/autoload.php";
 ?>
 
+<!-- total card section  -->
+<?php
+$conn = new mysqli(
+    settings()['hostname'], 
+    settings()['user'], 
+    settings()['password'], 
+    settings()['database']);
+
+$totalUsers = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
+$totalQuizzes = $conn->query("SELECT COUNT(*) AS total FROM quizzes")->fetch_assoc()['total'];
+
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +29,18 @@ $currentPage = basename($_SERVER['SCRIPT_NAME']);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/profile.css">
+    <!-- animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- for total card section -->
+       <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- FontAwesome -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
+<link rel="stylesheet" href="assets/css/total_card.css">
 
 </head>
 <body>
@@ -102,21 +128,21 @@ $currentPage = basename($_SERVER['SCRIPT_NAME']);
 <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" style="margin-top: 80px;">
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <img src="assets/images/Quiz1.png" class="d-block w-100" alt="Banner 1" style = "width:200px">
+      <img src="assets/images/car1.png" class="d-block w-100" alt="Banner 1" style = "width:200px">
       <div class="carousel-caption d-none d-md-block">
         <h2 class="text-white">Welcome to Quiz Palette</h2>
         <p>Your premium quiz platform for Bangladeshi students.</p>
       </div>
     </div>
     <div class="carousel-item">
-      <img src="assets/images/Quiz1.png" class="d-block w-100" alt="Banner 2">
+      <img src="assets/images/car2.png" class="d-block w-100" alt="Banner 2">
       <div class="carousel-caption d-none d-md-block">
         <h2 class="text-white">Master Your Skills</h2>
         <p>Practice, compete, and earn badges!</p>
       </div>
     </div>
     <div class="carousel-item">
-      <img src="assets/images/Quiz1.png" class="d-block w-100" alt="Banner 3">
+      <img src="assets/images/car1.png" class="d-block w-100" alt="Banner 3">
       <div class="carousel-caption d-none d-md-block">
         <h2 class="text-white">Shine on the Leaderboard</h2>
         <p>Track your performance and stand out.</p>
@@ -195,3 +221,5 @@ $(document).ready(function() {
 
 });
 </script>
+
+

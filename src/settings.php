@@ -2,7 +2,7 @@
 if (!function_exists('settings')) {
     function settings()
     {
-       $root = "http://localhost/ROUND64/PHP/Quiz-Palette2/"; 
+       $root = "http://localhost/WDPF-Rakib/Quiz-Palette2/"; 
         return [
             'root'  => $root,
             'companyname'=> 'Quiz Palette.',

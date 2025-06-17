@@ -775,7 +775,7 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                     <span class="navbar-brand text-white d-md-none">Admin</span>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+                            <a class="nav-link text-white" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
                         </li>
                     </ul>
                 </div>

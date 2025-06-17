@@ -16,19 +16,7 @@ require 'includes/header.php';
     padding: 20px;
     position: relative;
   }
-  .back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    background-color: #3b82f6; /* Theme primary color */
-    border-color: #3b82f6;
-    color: white;
-  }
-  .back-button:hover {
-    background-color: #1e40af; /* Theme hover color */
-    border-color: #1e40af;
-  }
+  
   .add-content-card {
     border: 1px solid #e0e7ff;
     border-radius: 8px;
@@ -98,9 +86,7 @@ require 'includes/header.php';
 </style>
 
 <div class="add-content-container">
-  <button class="btn back-button" onclick="history.back()">
-    <i class="fas fa-arrow-left me-2"></i> Back
-  </button>
+  
 
   <ul class="nav nav-tabs mb-4" id="addContentTab" role="tablist">
     <li class="nav-item" role="presentation">
