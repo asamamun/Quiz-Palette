@@ -1,12 +1,12 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
 // Database configuration
-$host = '127.0.0.1'; // or 'localhost'
-$username = 'root'; // Replace with your MySQL username
-$password = ''; // Replace with your MySQL password
-$database = 'quizpallete'; // Database name
-
-// Create connection
-$conn = mysqli_connect($host, $username, $password, $database);
+$conn = new mysqli(
+    settings()['hostname'], 
+    settings()['user'], 
+    settings()['password'], 
+    settings()['database']
+);
 
 // Check connection
 if (!$conn) {

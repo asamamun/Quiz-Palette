@@ -1,10 +1,13 @@
 <?php
-$host = "localhost";
-$db = "quizpallete";
-$user = "root";
-$pass = "";
+require_once __DIR__ . '/vendor/autoload.php';
+$conn = new mysqli(
+    settings()['hostname'], 
+    settings()['user'], 
+    settings()['password'], 
+    settings()['database']
+);
 
-$conn = new mysqli($host, $user, $pass, $db);
+
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $totalUsers = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];

@@ -1,12 +1,12 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
 // Database configuration
-$dbHost     = 'localhost';
-$dbUsername = 'root';
-$dbPassword = '';
-$dbName     = 'quizpallete';
-
-// Create database connection
-$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+$conn = new mysqli(
+    settings()['hostname'], 
+    settings()['user'], 
+    settings()['password'], 
+    settings()['database']
+);
 
 // Check connection
 if ($conn->connect_error) {
@@ -16,10 +16,15 @@ if ($conn->connect_error) {
 // Only process POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize and validate input data
-    $name = trim(filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING));
-    $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
-    $subject = trim(filter_input(INPUT_POST, 'subject', FILTER_SANITIZE_STRING));
-    $message = trim(filter_input(INPUT_POST, 'message', FILTER_SANITIZE_STRING));
+    $name = htmlentities(trim(filter_input(INPUT_POST, 'name', FILTER_SANITIZE_SPECIAL_CHARS)), ENT_QUOTES);
+    // $name = trim(filter_var(INPUT_POST, 'name', FILTER_SANITIZE_STRING));
+    // $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
+    $email = filter_var(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+
+/*     $subject = trim(filter_input(INPUT_POST, 'subject', FILTER_SANITIZE_STRING));
+    $message = trim(filter_input(INPUT_POST, 'message', FILTER_SANITIZE_STRING)); */
+    $subject = htmlspecialchars($_POST['subject'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $message = htmlspecialchars($_POST['message'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $subscribe = isset($_POST['subscribe']) ? 1 : 0;
     
     // Validate inputs

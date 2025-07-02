@@ -1,12 +1,12 @@
 <?php
 require __DIR__."/../vendor/autoload.php";
 require __DIR__."/admincheck.php";
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "quizpallete";
-
-$conn = new mysqli($host, $user, $pass, $dbname);
+$conn = new mysqli(
+    settings()['hostname'], 
+    settings()['user'], 
+    settings()['password'], 
+    settings()['database']
+);
 
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
