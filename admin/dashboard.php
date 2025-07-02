@@ -1,4 +1,6 @@
 <?php
+require __DIR__."/../vendor/autoload.php";
+require __DIR__."/admincheck.php";
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -10,19 +12,44 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$quizCount = $userCount = $resultCount = $examCount = 0;
+$quizCount = $userCount = $resultCount = $examCount = $messageCount = 0;
 
+// Fetch quiz count
 $q1 = $conn->query("SELECT COUNT(*) AS total FROM quizzes");
 if ($q1) $quizCount = $q1->fetch_assoc()['total'];
 
+// Fetch user count
 $q2 = $conn->query("SELECT COUNT(*) AS total FROM users");
 if ($q2) $userCount = $q2->fetch_assoc()['total'];
 
+// Fetch quiz reports count
 $q3 = $conn->query("SELECT COUNT(*) AS total FROM quiz_reports");
 if ($q3) $resultCount = $q3->fetch_assoc()['total'];
 
+// Fetch exam count
 $q4 = $conn->query("SELECT COUNT(*) AS total FROM exams");
 if ($q4) $examCount = $q4->fetch_assoc()['total'];
+
+// Fetch message count
+$q5 = $conn->query("SELECT COUNT(*) AS total FROM contact_messages");
+if ($q5) $messageCount = $q5->fetch_assoc()['total'];
+
+// Fetch all contact messages
+$messages = [];
+$q6 = $conn->query("SELECT id, name, email, subject, message, subscribe, created_at, is_read FROM contact_messages ORDER BY created_at DESC");
+if ($q6) {
+    while ($row = $q6->fetch_assoc()) {
+        $messages[] = $row;
+    }
+}
+
+// Handle mark as read
+if (isset($_POST['mark_read']) && isset($_POST['message_id'])) {
+    $message_id = (int)$_POST['message_id'];
+    $conn->query("UPDATE contact_messages SET is_read = 1 WHERE id = $message_id");
+    header("Location: dashboard.php");
+    exit;
+}
 
 $conn->close();
 ?>
@@ -49,8 +76,6 @@ $conn->close();
 
         .sidebar {
             background-color: var(--main-color);
-            min-height: 100vh;
-            padding-top: 1rem;
         }
 
         .nav-link {
@@ -96,6 +121,23 @@ $conn->close();
             background-color: var(--main-hover);
         }
 
+        .table {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .message-content {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         @media (max-width: 767.98px) {
             .card {
                 margin-bottom: 1rem;
@@ -114,10 +156,14 @@ $conn->close();
             .card-text {
                 font-size: 1.5rem;
             }
+
+            .message-content {
+                max-width: 100px;
+            }
         }
 
         @media print {
-            .sidebar, .navbar, .btn-primary {
+            .sidebar, .navbar, .btn-primary, .action-column {
                 display: none;
             }
 
@@ -130,6 +176,10 @@ $conn->close();
             .card-body {
                 background-color: #fff;
                 color: #000;
+            }
+
+            .table {
+                border: 1px solid #000;
             }
         }
     </style>
@@ -144,7 +194,7 @@ $conn->close();
                         <span class="navbar-brand text-white">Admin</span>
                     </div>
                 </nav>
-                <nav class="nav flex-column p-3">
+                <nav class="nav flex-column">
                     <a class="nav-link text-white active" href="dashboard.php"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
                     <a class="nav-link text-white" data-bs-toggle="collapse" href="#quizSubMenu" role="button" aria-expanded="false">
                         <i class="bi bi-ui-checks-grid me-2"></i>Manage Quizzes
@@ -159,6 +209,7 @@ $conn->close();
                     <a class="nav-link text-white" href="leaderboards.php"><i class="bi bi-trophy-fill me-2"></i>Leaderboards</a>
                     <a class="nav-link text-white" href="requests.php"><i class="bi bi-inbox-fill me-2"></i>Requests</a>
                     <a class="nav-link text-white" href="certificate.php"><i class="bi bi-award-fill me-2"></i>Certificates</a>
+                    <a class="nav-link text-white" href="verify_payments.php"><i class="bi bi-award-fill me-2"></i>Verify Payments</a>
                 </nav>
             </div>
 
@@ -173,7 +224,7 @@ $conn->close();
                         <span class="navbar-brand text-white d-md-none">Admin</span>
                         <ul class="navbar-nav ms-auto">
                             <li class="nav-item">
-                                <a class="nav-link text-white" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+                                <a class="nav-link text-white" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
                             </li>
                         </ul>
                     </div>
@@ -241,10 +292,69 @@ $conn->close();
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-envelope-fill me-2"></i>Total Messages</h5>
+                                    <p class="card-text fs-4"><?php echo $messageCount; ?></p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <button class="btn btn-primary mt-3" onclick="window.print();">
                         <i class="bi bi-printer me-2"></i>Print Dashboard
                     </button>
+
+                    <!-- Contact Messages Table -->
+                    <div class="mt-5">
+                        <h3 class="text-primary-emphasis"><i class="bi bi-envelope-fill me-2"></i>Contact Messages</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Subject</th>
+                                        <th>Message</th>
+                                        <th>Subscribed</th>
+                                        <th>Received</th>
+                                        <th>Status</th>
+                                        <th class="action-column">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($messages as $msg): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($msg['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($msg['email']); ?></td>
+                                            <td><?php echo htmlspecialchars($msg['subject']); ?></td>
+                                            <td class="message-content" title="<?php echo htmlspecialchars($msg['message']); ?>">
+                                                <?php echo htmlspecialchars(substr($msg['message'], 0, 50)) . (strlen($msg['message']) > 50 ? '...' : ''); ?>
+                                            </td>
+                                            <td><?php echo $msg['subscribe'] ? 'Yes' : 'No'; ?></td>
+                                            <td><?php echo date('M d, Y H:i', strtotime($msg['created_at'])); ?></td>
+                                            <td><?php echo $msg['is_read'] ? 'Read' : 'Unread'; ?></td>
+                                            <td class="action-column">
+                                                <?php if (!$msg['is_read']): ?>
+                                                    <form method="POST" style="display:inline;">
+                                                        <input type="hidden" name="message_id" value="<?php echo $msg['id']; ?>">
+                                                        <button type="submit" name="mark_read" class="btn btn-sm btn-primary">
+                                                            <i class="bi bi-check2-circle me-1"></i>Mark as Read
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    <?php if (empty($messages)): ?>
+                                        <tr>
+                                            <td colspan="8" class="text-center">No messages found.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

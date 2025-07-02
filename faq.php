@@ -20,7 +20,7 @@ require 'includes/header.php';?>
     }
     
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #f8f9fa;
     }
     
@@ -242,3 +242,4 @@ $(document).ready(function () {
 </script>
 </body>
 </html>
+<?php include "includes/footer.php" ?>

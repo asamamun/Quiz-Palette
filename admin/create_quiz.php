@@ -13,12 +13,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Add debugging to see if form is being submitted
-/* if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    echo "POST request received<br>";
-    var_dump($_POST); // Remove this after debugging
-} */
-
 // Helper function to sanitize input
 function sanitize($conn, $str) {
     return $conn->real_escape_string(trim($str));
@@ -195,224 +189,201 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // === QUIZ ===
-    // === QUIZ ===
-if (isset($_POST['add_quiz'])) {
-    //echo "add_quiz form detected<br>"; // Debug line - remove after testing
-    
-    $question = sanitize($conn, $_POST['question']);
-    $option_a = sanitize($conn, $_POST['option_a']);
-    $option_b = sanitize($conn, $_POST['option_b']);
-    $option_c = sanitize($conn, $_POST['option_c']);
-    $option_d = sanitize($conn, $_POST['option_d']);
-    $correct_option = sanitize($conn, $_POST['correct_option']);
-    $status = sanitize($conn, $_POST['status']);
-    $category_id = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
-    $class_id = !empty($_POST['class_id']) ? (int)$_POST['class_id'] : null;
-    $subject_id = !empty($_POST['subject_id']) ? (int)$_POST['subject_id'] : null;
-    $event_id = !empty($_POST['event_id']) ? (int)$_POST['event_id'] : null;
+    if (isset($_POST['add_quiz'])) {
+        $question = sanitize($conn, $_POST['question']);
+        $option_a = sanitize($conn, $_POST['option_a']);
+        $option_b = sanitize($conn, $_POST['option_b']);
+        $option_c = sanitize($conn, $_POST['option_c']);
+        $option_d = sanitize($conn, $_POST['option_d']);
+        $correct_option = sanitize($conn, $_POST['correct_option']);
+        $status = sanitize($conn, $_POST['status']);
+        $category_id = !empty($_POST['category_id']) && $_POST['category_id'] != -1 ? (int)$_POST['category_id'] : null;
+        $class_id = !empty($_POST['class_id']) ? (int)$_POST['class_id'] : null;
+        $subject_id = !empty($_POST['subject_id']) ? (int)$_POST['subject_id'] : null;
+        $event_id = !empty($_POST['event_id']) ? (int)$_POST['event_id'] : null;
 
-    // Debug: Check sanitized values
-    //echo "Sanitized question: " . $question . "<br>";
-    //echo "Category ID: " . $category_id . "<br>";
-
-    // Validate foreign keys
-    if ($category_id !== null) {
-        $check = $conn->prepare("SELECT id FROM categories WHERE id = ? AND status = 'active'");
-        if (!$check) {
-            die("Prepare failed for category check: " . $conn->error);
+        // Validate foreign keys
+        if ($category_id !== null) {
+            $check = $conn->prepare("SELECT id FROM categories WHERE id = ? AND status = 'active'");
+            if (!$check) {
+                die("Prepare failed for category check: " . $conn->error);
+            }
+            $check->bind_param("i", $category_id);
+            $check->execute();
+            if ($check->get_result()->num_rows === 0) {
+                $category_id = null;
+            }
+            $check->close();
         }
-        $check->bind_param("i", $category_id);
-        $check->execute();
-        if ($check->get_result()->num_rows === 0) {
-            $category_id = null;
-            //echo "Category not found or inactive<br>";
-        }
-        $check->close();
-    }
-    
-    if ($class_id !== null) {
-        $check = $conn->prepare("SELECT id FROM classes WHERE id = ? AND status = 'active'");
-        if (!$check) {
-            die("Prepare failed for class check: " . $conn->error);
-        }
-        $check->bind_param("i", $class_id);
-        $check->execute();
-        if ($check->get_result()->num_rows === 0) {
-            $class_id = null;
-        }
-        $check->close();
-    }
-    
-    if ($subject_id !== null) {
-        $check = $conn->prepare("SELECT id FROM subjects WHERE id = ? AND status = 'active'");
-        if (!$check) {
-            die("Prepare failed for subject check: " . $conn->error);
-        }
-        $check->bind_param("i", $subject_id);
-        $check->execute();
-        if ($check->get_result()->num_rows === 0) {
-            $subject_id = null;
-        }
-        $check->close();
-    }
-    
-    if ($event_id !== null) {
-        $check = $conn->prepare("SELECT id FROM events WHERE id = ? AND status = 'active'");
-        if (!$check) {
-            die("Prepare failed for event check: " . $conn->error);
-        }
-        $check->bind_param("i", $event_id);
-        $check->execute();
-        if ($check->get_result()->num_rows === 0) {
-            $event_id = null;
-        }
-        $check->close();
-    }
-    
-    // Validate required fields
-    if (empty($question) || empty($option_a) || empty($option_b) || empty($option_c) || empty($option_d)) {
-        $error_message = "All question and option fields are required.";
-        echo "Validation failed: " . $error_message . "<br>";
-    } else if ($category_id === null) {
-        $error_message = "Please select a valid category.";
-        echo "Validation failed: " . $error_message . "<br>";
-    } else {
-        //echo "Starting transaction...<br>";
         
-        // Start transaction
-        $conn->autocommit(false);
+        if ($class_id !== null) {
+            $check = $conn->prepare("SELECT id FROM classes WHERE id = ? AND status = 'active'");
+            if (!$check) {
+                die("Prepare failed for class check: " . $conn->error);
+            }
+            $check->bind_param("i", $class_id);
+            $check->execute();
+            if ($check->get_result()->num_rows === 0) {
+                $class_id = null;
+            }
+            $check->close();
+        }
         
-        try {
-            // Generate quiz title and slug from question (first 50 chars)
-            $quiz_title = substr($question, 0, 50) . (strlen($question) > 50 ? '...' : '');
-            $quiz_slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $quiz_title)));
+        if ($subject_id !== null) {
+            $check = $conn->prepare("SELECT id FROM subjects WHERE id = ? AND status = 'active'");
+            if (!$check) {
+                die("Prepare failed for subject check: " . $conn->error);
+            }
+            $check->bind_param("i", $subject_id);
+            $check->execute();
+            if ($check->get_result()->num_rows === 0) {
+                $subject_id = null;
+            }
+            $check->close();
+        }
+        
+        if ($event_id !== null) {
+            $check = $conn->prepare("SELECT id FROM events WHERE id = ? AND status = 'active'");
+            if (!$check) {
+                die("Prepare failed for event check: " . $conn->error);
+            }
+            $check->bind_param("i", $event_id);
+            $check->execute();
+            if ($check->get_result()->num_rows === 0) {
+                $event_id = null;
+            }
+            $check->close();
+        }
+        
+        // Validate required fields
+        if (empty($question) || empty($option_a) || empty($option_b) || empty($option_c) || empty($option_d)) {
+            $error_message = "All question and option fields are required.";
+            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>$error_message<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        } else if ($category_id === null) {
+            $error_message = "Please select a valid category.";
+            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>$error_message<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        } else {
+            // Start transaction
+            $conn->autocommit(false);
             
-            // Ensure unique slug
-            $slug_counter = 1;
-            $original_slug = $quiz_slug;
-            while (true) {
-                $slug_check = $conn->prepare("SELECT id FROM quizzes WHERE title = ?");
-                if (!$slug_check) {
-                    throw new Exception("Prepare failed for slug check: " . $conn->error);
-                }
-                $slug_check->bind_param("s", $quiz_title);
-                $slug_check->execute();
-                if ($slug_check->get_result()->num_rows === 0) {
+            try {
+                // Generate quiz title and slug from question (first 50 chars)
+                $quiz_title = substr($question, 0, 50) . (strlen($question) > 50 ? '...' : '');
+                $quiz_slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $quiz_title)));
+                
+                // Ensure unique slug
+                $slug_counter = 1;
+                $original_slug = $quiz_slug;
+                while (true) {
+                    $slug_check = $conn->prepare("SELECT id FROM quizzes WHERE title = ?");
+                    if (!$slug_check) {
+                        throw new Exception("Prepare failed for slug check: " . $conn->error);
+                    }
+                    $slug_check->bind_param("s", $quiz_title);
+                    $slug_check->execute();
+                    if ($slug_check->get_result()->num_rows === 0) {
+                        $slug_check->close();
+                        break;
+                    }
                     $slug_check->close();
-                    break;
+                    $quiz_title = substr($question, 0, 47) . '-' . $slug_counter . '...';
+                    $slug_counter++;
                 }
-                $slug_check->close();
-                $quiz_title = substr($question, 0, 47) . '-' . $slug_counter . '...';
-                $slug_counter++;
-            }
-            
-            //echo "Quiz title: " . $quiz_title . "<br>";
-            
-            // **FIXED: Insert into quizzes table with correct column structure**
-            $quiz_sql = "INSERT INTO quizzes (
-                title, description, status, category_id, class_id, subject_id, event_id, created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            $quiz_stmt = $conn->prepare($quiz_sql);
-            if (!$quiz_stmt) {
-                throw new Exception("Prepare failed for quiz insert: " . $conn->error);
-            }
-            
-            // Check if user_id exists in session
-            $created_by = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-            
-            $quiz_stmt->bind_param(
-                "sssiiiii", 
-                $quiz_title, $quiz_title, $status, $category_id, $class_id, $subject_id, $event_id, $created_by
-            );
-            
-            if (!$quiz_stmt->execute()) {
-                throw new Exception("Failed to insert quiz: " . $quiz_stmt->error);
-            }
-            
-            $quiz_id = $conn->insert_id;
-            $quiz_stmt->close();
-            
-           // echo "Quiz inserted with ID: " . $quiz_id . "<br>";
-            
-            // 2. Insert into questions table
-            $question_sql = "INSERT INTO questions (
-                quiz_id, question_text, question_type, marks, status, order_index
-            ) VALUES (?, ?, ?, ?, ?, ?)";
-            
-            $question_type = 'multiple_choice';
-            $marks = 1;
-            $order_index = 1;
-            
-            $question_stmt = $conn->prepare($question_sql);
-            if (!$question_stmt) {
-                throw new Exception("Prepare failed for question insert: " . $conn->error);
-            }
-            
-            $question_stmt->bind_param(
-                "issisi", 
-                $quiz_id, $question, $question_type, $marks, $status, $order_index
-            );
-            
-            if (!$question_stmt->execute()) {
-                throw new Exception("Failed to insert question: " . $question_stmt->error);
-            }
-            
-            $question_id = $conn->insert_id;
-            $question_stmt->close();
-            
-            echo "Question inserted with ID: " . $question_id . "<br>";
-            
-            // 3. Insert into question_options table
-            $options = [
-                ['text' => $option_a, 'is_correct' => ($correct_option === 'a'), 'order' => 1],
-                ['text' => $option_b, 'is_correct' => ($correct_option === 'b'), 'order' => 2],
-                ['text' => $option_c, 'is_correct' => ($correct_option === 'c'), 'order' => 3],
-                ['text' => $option_d, 'is_correct' => ($correct_option === 'd'), 'order' => 4]
-            ];
-            
-            $option_sql = "INSERT INTO question_options (
-                question_id, option_text, is_correct, order_index
-            ) VALUES (?, ?, ?, ?)";
-            
-            $option_stmt = $conn->prepare($option_sql);
-            if (!$option_stmt) {
-                throw new Exception("Prepare failed for option insert: " . $conn->error);
-            }
-            
-            foreach ($options as $option) {
-                $is_correct = $option['is_correct'] ? 1 : 0;
-                $option_stmt->bind_param(
-                    "isii", 
-                    $question_id, $option['text'], $is_correct, $option['order']
+                
+                // Insert into quizzes table
+                $quiz_sql = "INSERT INTO quizzes (
+                    title, description, status, category_id, class_id, subject_id, event_id, created_by
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                
+                $quiz_stmt = $conn->prepare($quiz_sql);
+                if (!$quiz_stmt) {
+                    throw new Exception("Prepare failed for quiz insert: " . $conn->error);
+                }
+                
+                $created_by = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+                
+                $quiz_stmt->bind_param(
+                    "sssiiiii", 
+                    $quiz_title, $quiz_title, $status, $category_id, $class_id, $subject_id, $event_id, $created_by
                 );
                 
-                if (!$option_stmt->execute()) {
-                    throw new Exception("Failed to insert option: " . $option_stmt->error);
+                if (!$quiz_stmt->execute()) {
+                    throw new Exception("Failed to insert quiz: " . $quiz_stmt->error);
                 }
+                
+                $quiz_id = $conn->insert_id;
+                $quiz_stmt->close();
+                
+                // Insert into questions table
+                $question_sql = "INSERT INTO questions (
+                    quiz_id, question_text, question_type, marks, status, order_index
+                ) VALUES (?, ?, ?, ?, ?, ?)";
+                
+                $question_type = 'multiple_choice';
+                $marks = 1;
+                $order_index = 1;
+                
+                $question_stmt = $conn->prepare($question_sql);
+                if (!$question_stmt) {
+                    throw new Exception("Prepare failed for question insert: " . $conn->error);
+                }
+                
+                $question_stmt->bind_param(
+                    "issisi", 
+                    $quiz_id, $question, $question_type, $marks, $status, $order_index
+                );
+                
+                if (!$question_stmt->execute()) {
+                    throw new Exception("Failed to insert question: " . $question_stmt->error);
+                }
+                
+                $question_id = $conn->insert_id;
+                $question_stmt->close();
+                
+                // Insert into question_options table
+                $options = [
+                    ['text' => $option_a, 'is_correct' => ($correct_option === 'a'), 'order' => 1],
+                    ['text' => $option_b, 'is_correct' => ($correct_option === 'b'), 'order' => 2],
+                    ['text' => $option_c, 'is_correct' => ($correct_option === 'c'), 'order' => 3],
+                    ['text' => $option_d, 'is_correct' => ($correct_option === 'd'), 'order' => 4]
+                ];
+                
+                $option_sql = "INSERT INTO question_options (
+                    question_id, option_text, is_correct, order_index
+                ) VALUES (?, ?, ?, ?)";
+                
+                $option_stmt = $conn->prepare($option_sql);
+                if (!$option_stmt) {
+                    throw new Exception("Prepare failed for option insert: " . $conn->error);
+                }
+                
+                foreach ($options as $option) {
+                    $is_correct = $option['is_correct'] ? 1 : 0;
+                    $option_stmt->bind_param(
+                        "isii", 
+                        $question_id, $option['text'], $is_correct, $option['order']
+                    );
+                    
+                    if (!$option_stmt->execute()) {
+                        throw new Exception("Failed to insert option: " . $option_stmt->error);
+                    }
+                }
+                $option_stmt->close();
+                
+                // If we reach here, all queries succeeded
+                $conn->commit();
+                echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Quiz created successfully!<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+                
+            } catch (Exception $e) {
+                // An error occurred, rollback the transaction
+                $conn->rollback();
+                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Error creating quiz: " . htmlspecialchars($e->getMessage()) . "<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+            } finally {
+                // Reset autocommit to true
+                $conn->autocommit(true);
             }
-            $option_stmt->close();
-            
-            //echo "All options inserted successfully<br>";
-            
-            // If we reach here, all queries succeeded
-            $conn->commit();
-            $success_message = "Quiz created successfully!";
-           // echo "Transaction committed: " . $success_message . "<br>";
-            
-        } catch (Exception $e) {
-            // An error occurred, rollback the transaction
-            $conn->rollback();
-            $error_message = "Error creating quiz: " . $e->getMessage();
-            //echo "Transaction rolled back: " . $error_message . "<br>";
-        } finally {
-            // Reset autocommit to true
-            $conn->autocommit(true);
         }
     }
-} else {
-    //echo "Form not submitted or add_quiz not set<br>";
-}
 
     if (isset($_POST['edit_quiz'])) {
         $id = (int)$_POST['id'];
@@ -428,49 +399,175 @@ if (isset($_POST['add_quiz'])) {
         $subject_id = !empty($_POST['subject_id']) ? (int)$_POST['subject_id'] : null;
         $event_id = !empty($_POST['event_id']) ? (int)$_POST['event_id'] : null;
 
-        // Validate foreign keys
-        if ($category_id !== null) {
-            $check = $conn->prepare("SELECT id FROM categories WHERE id = ? AND status = 'active'");
-            $check->bind_param("i", $category_id);
-            $check->execute();
-            if ($check->get_result()->num_rows === 0) {
-                $category_id = null;
+        // Start transaction
+        $conn->autocommit(false);
+        
+        try {
+            // Validate foreign keys
+            if ($category_id !== null) {
+                $check = $conn->prepare("SELECT id FROM categories WHERE id = ? AND status = 'active'");
+                $check->bind_param("i", $category_id);
+                $check->execute();
+                if ($check->get_result()->num_rows === 0) {
+                    $category_id = null;
+                }
+                $check->close();
             }
-        }
-        if ($class_id !== null) {
-            $check = $conn->prepare("SELECT id FROM classes WHERE id = ? AND status = 'active'");
-            $check->bind_param("i", $class_id);
-            $check->execute();
-            if ($check->get_result()->num_rows === 0) {
-                $class_id = null;
+            if ($class_id !== null) {
+                $check = $conn->prepare("SELECT id FROM classes WHERE id = ? AND status = 'active'");
+                $check->bind_param("i", $class_id);
+                $check->execute();
+                if ($check->get_result()->num_rows === 0) {
+                    $class_id = null;
+                }
+                $check->close();
             }
-        }
-        if ($subject_id !== null) {
-            $check = $conn->prepare("SELECT id FROM subjects WHERE id = ? AND status = 'active'");
-            $check->bind_param("i", $subject_id);
-            $check->execute();
-            if ($check->get_result()->num_rows === 0) {
-                $subject_id = null;
+            if ($subject_id !== null) {
+                $check = $conn->prepare("SELECT id FROM subjects WHERE id = ? AND status = 'active'");
+                $check->bind_param("i", $subject_id);
+                $check->execute();
+                if ($check->get_result()->num_rows === 0) {
+                    $subject_id = null;
+                }
+                $check->close();
             }
-        }
-        if ($event_id !== null) {
-            $check = $conn->prepare("SELECT id FROM events WHERE id = ? AND status = 'active'");
-            $check->bind_param("i", $event_id);
-            $check->execute();
-            if ($check->get_result()->num_rows === 0) {
-                $event_id = null;
+            if ($event_id !== null) {
+                $check = $conn->prepare("SELECT id FROM events WHERE id = ? AND status = 'active'");
+                $check->bind_param("i", $event_id);
+                $check->execute();
+                if ($check->get_result()->num_rows === 0) {
+                    $event_id = null;
+                }
+                $check->close();
             }
-        }
 
-        $stmt = $conn->prepare("UPDATE quizzes SET question=?, option_a=?, option_b=?, option_c=?, option_d=?, correct_option=?, status=?, category_id=?, class_id=?, subject_id=?, event_id=? WHERE id=?");
-        $stmt->bind_param("sssssssiiiii", $question, $option_a, $option_b, $option_c, $option_d, $correct_option, $status, $category_id, $class_id, $subject_id, $event_id, $id);
-        $stmt->execute();
+            // Update quiz title and metadata
+            $quiz_title = substr($question, 0, 50) . (strlen($question) > 50 ? '...' : '');
+            $quiz_slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $quiz_title)));
+            
+            // Ensure unique slug
+            $slug_counter = 1;
+            $original_slug = $quiz_slug;
+            while (true) {
+                $slug_check = $conn->prepare("SELECT id FROM quizzes WHERE title = ? AND id != ?");
+                $slug_check->bind_param("si", $quiz_title, $id);
+                $slug_check->execute();
+                if ($slug_check->get_result()->num_rows === 0) {
+                    $slug_check->close();
+                    break;
+                }
+                $slug_check->close();
+                $quiz_title = substr($question, 0, 47) . '-' . $slug_counter . '...';
+                $slug_counter++;
+            }
+            
+            $quiz_stmt = $conn->prepare("UPDATE quizzes SET title=?, description=?, status=?, category_id=?, class_id=?, subject_id=?, event_id=? WHERE id=?");
+            $quiz_stmt->bind_param("sssiiiii", $quiz_title, $quiz_title, $status, $category_id, $class_id, $subject_id, $event_id, $id);
+            if (!$quiz_stmt->execute()) {
+                throw new Exception("Failed to update quiz: " . $quiz_stmt->error);
+            }
+            $quiz_stmt->close();
+
+            // Fetch question_id for this quiz
+            $question_stmt = $conn->prepare("SELECT id FROM questions WHERE quiz_id = ? LIMIT 1");
+            $question_stmt->bind_param("i", $id);
+            $question_stmt->execute();
+            $result = $question_stmt->get_result();
+            if ($result->num_rows === 0) {
+                throw new Exception("No question found for quiz ID: " . $id);
+            }
+            $question_id = $result->fetch_assoc()['id'];
+            $question_stmt->close();
+
+            // Update question
+            $question_sql = "UPDATE questions SET question_text=?, question_type=?, marks=?, status=?, order_index=? WHERE id=?";
+            $question_type = 'multiple_choice';
+            $marks = 1;
+            $order_index = 1;
+            
+            $question_stmt = $conn->prepare($question_sql);
+            $question_stmt->bind_param("ssisii", $question, $question_type, $marks, $status, $order_index, $question_id);
+            if (!$question_stmt->execute()) {
+                throw new Exception("Failed to update question: " . $question_stmt->error);
+            }
+            $question_stmt->close();
+
+            // Delete existing options
+            $delete_stmt = $conn->prepare("DELETE FROM question_options WHERE question_id = ?");
+            $delete_stmt->bind_param("i", $question_id);
+            if (!$delete_stmt->execute()) {
+                throw new Exception("Failed to delete existing options: " . $delete_stmt->error);
+            }
+            $delete_stmt->close();
+
+            // Insert new options
+            $options = [
+                ['text' => $option_a, 'is_correct' => ($correct_option === 'a'), 'order' => 1],
+                ['text' => $option_b, 'is_correct' => ($correct_option === 'b'), 'order' => 2],
+                ['text' => $option_c, 'is_correct' => ($correct_option === 'c'), 'order' => 3],
+                ['text' => $option_d, 'is_correct' => ($correct_option === 'd'), 'order' => 4]
+            ];
+            
+            $option_sql = "INSERT INTO question_options (
+                question_id, option_text, is_correct, order_index
+            ) VALUES (?, ?, ?, ?)";
+            
+            $option_stmt = $conn->prepare($option_sql);
+            foreach ($options as $option) {
+                $is_correct = $option['is_correct'] ? 1 : 0;
+                $option_stmt->bind_param("isii", $question_id, $option['text'], $is_correct, $option['order']);
+                if (!$option_stmt->execute()) {
+                    throw new Exception("Failed to insert option: " . $option_stmt->error);
+                }
+            }
+            $option_stmt->close();
+            
+            $conn->commit();
+            echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Quiz updated successfully!<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Error updating quiz: " . htmlspecialchars($e->getMessage()) . "<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        } finally {
+            $conn->autocommit(true);
+        }
     }
     if (isset($_POST['delete_quiz'])) {
         $id = (int)$_POST['id'];
-        $stmt = $conn->prepare("DELETE FROM quizzes WHERE id=?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
+        $conn->autocommit(false);
+        try {
+            // Delete options
+            $question_stmt = $conn->prepare("SELECT id FROM questions WHERE quiz_id = ?");
+            $question_stmt->bind_param("i", $id);
+            $question_stmt->execute();
+            $result = $question_stmt->get_result();
+            while ($row = $result->fetch_assoc()) {
+                $delete_stmt = $conn->prepare("DELETE FROM question_options WHERE question_id = ?");
+                $delete_stmt->bind_param("i", $row['id']);
+                $delete_stmt->execute();
+                $delete_stmt->close();
+            }
+            $question_stmt->close();
+
+            // Delete questions
+            $question_stmt = $conn->prepare("DELETE FROM questions WHERE quiz_id = ?");
+            $question_stmt->bind_param("i", $id);
+            $question_stmt->execute();
+            $question_stmt->close();
+
+            // Delete quiz
+            $stmt = $conn->prepare("DELETE FROM quizzes WHERE id=?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $stmt->close();
+
+            $conn->commit();
+            echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Quiz deleted successfully!<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Error deleting quiz: " . htmlspecialchars($e->getMessage()) . "<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        } finally {
+            $conn->autocommit(true);
+        }
     }
 
     // === PENDING QUESTIONS ===
@@ -493,54 +590,180 @@ if (isset($_POST['add_quiz'])) {
             $class_id = !empty($row['class_id']) ? (int)$row['class_id'] : null;
             $subject_id = !empty($row['subject_id']) ? (int)$row['subject_id'] : null;
             $event_id = !empty($row['event_id']) ? (int)$row['event_id'] : null;
+            $created_by = !empty($row['created_by']) ? (int)$row['created_by'] : null;
 
-            // Validate foreign keys
-            if ($category_id !== null) {
-                $check = $conn->prepare("SELECT id FROM categories WHERE id = ? AND status = 'active'");
-                $check->bind_param("i", $category_id);
-                $check->execute();
-                if ($check->get_result()->num_rows === 0) {
-                    $category_id = null;
+            // Start transaction
+            $conn->autocommit(false);
+            try {
+                // Validate foreign keys
+                if ($category_id !== null) {
+                    $check = $conn->prepare("SELECT id FROM categories WHERE id = ? AND status = 'active'");
+                    $check->bind_param("i", $category_id);
+                    $check->execute();
+                    if ($check->get_result()->num_rows === 0) {
+                        $category_id = null;
+                    }
+                    $check->close();
                 }
-            }
-            if ($class_id !== null) {
-                $check = $conn->prepare("SELECT id FROM classes WHERE id = ? AND status = 'active'");
-                $check->bind_param("i", $class_id);
-                $check->execute();
-                if ($check->get_result()->num_rows === 0) {
-                    $class_id = null;
+                if ($class_id !== null) {
+                    $check = $conn->prepare("SELECT id FROM classes WHERE id = ? AND status = 'active'");
+                    $check->bind_param("i", $class_id);
+                    $check->execute();
+                    if ($check->get_result()->num_rows === 0) {
+                        $class_id = null;
+                    }
+                    $check->close();
                 }
-            }
-            if ($subject_id !== null) {
-                $check = $conn->prepare("SELECT id FROM subjects WHERE id = ? AND status = 'active'");
-                $check->bind_param("i", $subject_id);
-                $check->execute();
-                if ($check->get_result()->num_rows === 0) {
-                    $subject_id = null;
+                if ($subject_id !== null) {
+                    $check = $conn->prepare("SELECT id FROM subjects WHERE id = ? AND status = 'active'");
+                    $check->bind_param("i", $subject_id);
+                    $check->execute();
+                    if ($check->get_result()->num_rows === 0) {
+                        $subject_id = null;
+                    }
+                    $check->close();
                 }
-            }
-            if ($event_id !== null) {
-                $check = $conn->prepare("SELECT id FROM events WHERE id = ? AND status = 'active'");
-                $check->bind_param("i", $event_id);
-                $check->execute();
-                if ($check->get_result()->num_rows === 0) {
-                    $event_id = null;
+                if ($event_id !== null) {
+                    $check = $conn->prepare("SELECT id FROM events WHERE id = ? AND status = 'active'");
+                    $check->bind_param("i", $event_id);
+                    $check->execute();
+                    if ($check->get_result()->num_rows === 0) {
+                        $event_id = null;
+                    }
+                    $check->close();
                 }
-            }
 
-            // Insert into quizzes
-            $stmt = $conn->prepare("INSERT INTO quizzes (question, option_a, option_b, option_c, option_d, correct_option, status, category_id, class_id, subject_id, event_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-            $stmt->bind_param("sssssssiiii", $question, $option_a, $option_b, $option_c, $option_d, $correct_option, $status, $category_id, $class_id, $subject_id, $event_id);
-            if ($stmt->execute()) {
+                // Validate required fields
+                if (empty($question) || empty($option_a) || empty($option_b) || empty($option_c) || empty($option_d)) {
+                    throw new Exception("All question and option fields are required.");
+                }
+                if ($category_id === null) {
+                    throw new Exception("Please select a valid category.");
+                }
+
+                // Generate quiz title and slug from question (first 50 chars)
+                $quiz_title = substr($question, 0, 50) . (strlen($question) > 50 ? '...' : '');
+                $quiz_slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $quiz_title)));
+                
+                // Ensure unique slug
+                $slug_counter = 1;
+                $original_slug = $quiz_slug;
+                while (true) {
+                    $slug_check = $conn->prepare("SELECT id FROM quizzes WHERE title = ?");
+                    if (!$slug_check) {
+                        throw new Exception("Prepare failed for slug check: " . $conn->error);
+                    }
+                    $slug_check->bind_param("s", $quiz_title);
+                    $slug_check->execute();
+                    if ($slug_check->get_result()->num_rows === 0) {
+                        $slug_check->close();
+                        break;
+                    }
+                    $slug_check->close();
+                    $quiz_title = substr($question, 0, 47) . '-' . $slug_counter . '...';
+                    $slug_counter++;
+                }
+
+                // Insert into quizzes table
+                $quiz_sql = "INSERT INTO quizzes (
+                    title, description, status, category_id, class_id, subject_id, event_id, created_by
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                
+                $quiz_stmt = $conn->prepare($quiz_sql);
+                if (!$quiz_stmt) {
+                    throw new Exception("Prepare failed for quiz insert: " . $conn->error);
+                }
+                
+                $quiz_stmt->bind_param(
+                    "sssiiiii", 
+                    $quiz_title, $quiz_title, $status, $category_id, $class_id, $subject_id, $event_id, $created_by
+                );
+                
+                if (!$quiz_stmt->execute()) {
+                    throw new Exception("Failed to insert quiz: " . $quiz_stmt->error);
+                }
+                
+                $quiz_id = $conn->insert_id;
+                $quiz_stmt->close();
+                
+                // Insert into questions table
+                $question_sql = "INSERT INTO questions (
+                    quiz_id, question_text, question_type, marks, status, order_index
+                ) VALUES (?, ?, ?, ?, ?, ?)";
+                
+                $question_type = 'multiple_choice';
+                $marks = 1;
+                $order_index = 1;
+                
+                $question_stmt = $conn->prepare($question_sql);
+                if (!$question_stmt) {
+                    throw new Exception("Prepare failed for question insert: " . $conn->error);
+                }
+                
+                $question_stmt->bind_param(
+                    "issisi", 
+                    $quiz_id, $question, $question_type, $marks, $status, $order_index
+                );
+                
+                if (!$question_stmt->execute()) {
+                    throw new Exception("Failed to insert question: " . $question_stmt->error);
+                }
+                
+                $question_id = $conn->insert_id;
+                $question_stmt->close();
+                
+                // Insert into question_options table
+                $options = [
+                    ['text' => $option_a, 'is_correct' => ($correct_option === 'a'), 'order' => 1],
+                    ['text' => $option_b, 'is_correct' => ($correct_option === 'b'), 'order' => 2],
+                    ['text' => $option_c, 'is_correct' => ($correct_option === 'c'), 'order' => 3],
+                    ['text' => $option_d, 'is_correct' => ($correct_option === 'd'), 'order' => 4]
+                ];
+                
+                $option_sql = "INSERT INTO question_options (
+                    question_id, option_text, is_correct, order_index
+                ) VALUES (?, ?, ?, ?)";
+                
+                $option_stmt = $conn->prepare($option_sql);
+                if (!$option_stmt) {
+                    throw new Exception("Prepare failed for option insert: " . $conn->error);
+                }
+                
+                foreach ($options as $option) {
+                    $is_correct = $option['is_correct'] ? 1 : 0;
+                    $option_stmt->bind_param(
+                        "isii", 
+                        $question_id, $option['text'], $is_correct, $option['order']
+                    );
+                    
+                    if (!$option_stmt->execute()) {
+                        throw new Exception("Failed to insert option: " . $option_stmt->error);
+                    }
+                }
+                $option_stmt->close();
+                
                 // Update pending question status
-                $stmt = $conn->prepare("UPDATE pending_questions SET status = 'approved' WHERE id = ?");
-                $stmt->bind_param("i", $id);
-                $stmt->execute();
+                $update_stmt = $conn->prepare("UPDATE pending_questions SET status = 'approved' WHERE id = ?");
+                $update_stmt->bind_param("i", $id);
+                if (!$update_stmt->execute()) {
+                    throw new Exception("Failed to update pending question status: " . $update_stmt->error);
+                }
+                $update_stmt->close();
+                
+                // If we reach here, all queries succeeded
+                $conn->commit();
                 echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Question approved and added to quizzes.<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
-            } else {
-                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Failed to approve question.<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+                
+            } catch (Exception $e) {
+                // An error occurred, rollback the transaction
+                $conn->rollback();
+                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Error approving question: " . htmlspecialchars($e->getMessage()) . "<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+            } finally {
+                // Reset autocommit to true
+                $conn->autocommit(true);
             }
         }
+        $stmt->close();
     }
     if (isset($_POST['reject_question'])) {
         $id = (int)$_POST['id'];
@@ -548,6 +771,7 @@ if (isset($_POST['add_quiz'])) {
         $stmt->bind_param("i", $id);
         $stmt->execute();
         echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Question rejected.<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        $stmt->close();
     }
     if (isset($_POST['delete_pending_question'])) {
         $id = (int)$_POST['id'];
@@ -555,6 +779,7 @@ if (isset($_POST['add_quiz'])) {
         $stmt->bind_param("i", $id);
         $stmt->execute();
         echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Pending question deleted.<button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
+        $stmt->close();
     }
 
     // Redirect to avoid form resubmission
@@ -567,17 +792,6 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY created_at DESC");
 $classes = $conn->query("SELECT c.*, cat.name AS category_name FROM classes c LEFT JOIN categories cat ON c.category_id = cat.id ORDER BY c.id DESC");
 $subjects = $conn->query("SELECT s.*, c.name AS class_name, cat.name AS category_name FROM subjects s LEFT JOIN classes c ON s.class_id = c.id LEFT JOIN categories cat ON s.category_id = cat.id ORDER BY s.id DESC");
 $events = $conn->query("SELECT * FROM events ORDER BY id DESC");
-/* $quizzes = $conn->query("SELECT q.*, cat.name AS category_name, cl.name AS class_name, s.name AS subject_name, e.name AS event_name 
-                         FROM quizzes q 
-                         LEFT JOIN categories cat ON q.category_id = cat.id 
-                         LEFT JOIN classes cl ON q.class_id = cl.id 
-                         LEFT JOIN subjects s ON q.subject_id = s.id 
-                         LEFT JOIN events e ON q.event_id = e.id 
-                         ORDER BY q.id DESC"); */
-/*                          echo "<pre>";
-                         var_dump($quizzes->fetch_all(MYSQLI_ASSOC));
-                         echo "</pre>";
-                         exit; */
 $query = "SELECT 
     q.id as quiz_id,
     q.title as quiz_title,
@@ -637,7 +851,6 @@ if ($quizzes->num_rows > 0) {
         }
     }
 }
-
 
 $pending_questions = $conn->query("SELECT pq.*, cat.name AS category_name, cl.name AS class_name, s.name AS subject_name, e.name AS event_name, COALESCE(u.first_name, u.username) AS display_name 
                                    FROM pending_questions pq 
@@ -775,7 +988,7 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                     <span class="navbar-brand text-white d-md-none">Admin</span>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+                            <a class="nav-link text-white" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
                         </li>
                     </ul>
                 </div>
@@ -990,7 +1203,7 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                         <?php if ($allCategories->num_rows === 0 || $allClasses->num_rows === 0): ?>
                             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                                 No active categories or classes available. Please add them first.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss='alert'></button>
                             </div>
                         <?php else: ?>
                             <form method="POST" class="row g-3 mb-4">
@@ -1066,7 +1279,7 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                                                     <select name="class_id" class="form-select form-select-sm">
                                                         <option value="">None</option>
                                                         <?php while ($class = $allClasses->fetch_assoc()): ?>
-                                                            <option value="<?= $class['id'] ?>" <?= $row['class_id'] == $class['id'] ? 'selected' : '' ?>><?= htmlspecialchars($class['name']) ?></option>
+                                                            <option value="<?= $class['id'] ?>" <?= $row['class_id'] == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($class['name']) ?></option>
                                                         <?php endwhile; ?>
                                                         <?php $allClasses->data_seek(0); ?>
                                                     </select>
@@ -1192,28 +1405,22 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                                                 <label class="form-label">Class</label>
                                                 <select name="class_id" id="aq_class_id" class="form-select">
                                                     <option value="">Select Class</option>
-                                                    
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">Subject</label>
                                                 <select name="subject_id" id="aq_subject_id" class="form-select">
                                                     <option value="">Select Subject</option>
-                                                    
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">Event</label>
                                                 <select name="event_id" id="aq_event_id" class="form-select">
                                                     <option value="">Select Event</option>
-                                                    <!-- show events from $events variable -->
-                                                        <?php
-                                                        while ($event = $allEvents->fetch_assoc()): ?>
-                                                            <option value="<?= $event['id'] ?>"><?= htmlspecialchars($event['name']) ?></option>
-                                                        <?php endwhile;
-                                                        $events->data_seek(0);
-                                                        ?>
-                                                    
+                                                    <?php while ($event = $allEvents->fetch_assoc()): ?>
+                                                        <option value="<?= $event['id'] ?>"><?= htmlspecialchars($event['name']) ?></option>
+                                                    <?php endwhile; ?>
+                                                    <?php $allEvents->data_seek(0); ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -1239,226 +1446,238 @@ $allEvents = $conn->query("SELECT id, name FROM events WHERE status='active'");
                                                 <input type="text" name="option_d" class="form-control" required>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Correct Option</label>
-                                                <select name="correct_option" class="form-select" required>
-                                                    <option value="a">Option A</option>
-                                                    <option value="b">Option B</option>
-                                                    <option value="c">Option C</option>
-                                                    <option value="d">Option D</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Status</label>
-                                                <select name="status" class="form-select">
-                                                    <option value="active" selected>Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
-                                            </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Correct Option</label>
+                                            <select name="correct_option" class="form-select" required>
+                                                <option value="">Select Correct Option</option>
+                                                <option value="a">Option A</option>
+                                                <option value="b">Option B</option>
+                                                <option value="c">Option C</option>
+                                                <option value="d">Option D</option>
+                                            </select>
                                         </div>
-                                        <button type="submit" class="btn btn-theme w-100 mt-2">
-                                            <i class="bi bi-check-circle me-1"></i> Submit Quiz
-                                        </button>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Status</label>
+                                            <select name="status" class="form-select">
+                                                <option value="active" selected>Active</option>
+                                                <option value="inactive">Inactive</option>
+                                            </select>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-theme">Add Quiz</button>
+                                        </div>
                                     </form>
                                 <?php endif; ?>
                             </div>
                         </div>
 
                         <h4>Existing Quizzes</h4>
-<!--  -->
-<!--  -->
-<h1>Quiz Database - All Quizzes with Answers</h1>
-    
-    <?php if (empty($quiz_data)): ?>
-        <div class="no-data">
-            <p>No active quizzes found in the database.</p>
-        </div>
-    <?php else: ?>
-        <?php foreach ($quiz_data as $quiz_id => $quiz): ?>
-            <div class="quiz-container">
-                <div class="quiz-header">
-                    Quiz #<?php echo $quiz_id; ?>: <?php echo htmlspecialchars($quiz['title']); ?>
-                </div>
-                
-                <?php if (!empty($quiz['description'])): ?>
-                    <div class="quiz-description">
-                        <?php echo htmlspecialchars($quiz['description']); ?>
-                    </div>
-                <?php endif; ?>
-                <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Question</th>
-                            <th>Type</th>
-                            <th>Difficulty</th>
-                            <th>Marks</th>
-                            <th>Options & Answers</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($quiz['questions'] as $question_id => $question): ?>
-                            <tr>
-                                <td>
-                                    <div class="question-text">
-                                        Q<?php echo $question_id; ?>: <?php echo htmlspecialchars($question['question_text']); ?>
-                                    </div>
-                                </td>
-                                <td><?php echo ucfirst(str_replace('_', ' ', $question['question_type'])); ?></td>
-                                <td>
-                                    <span class="difficulty <?php echo $question['difficulty']; ?>">
-                                        <?php echo $question['difficulty']; ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="marks"><?php echo $question['marks']; ?> pts</span>
-                                </td>
-                                <td>
-                                    <?php foreach ($question['options'] as $option): ?>
-                                        <div class="option">
-                                            <?php if ($option['is_correct']): ?>
-                                                <span class="correct-answer">
-                                                    ✓ <?php echo htmlspecialchars($option['option_text']); ?> (Correct)
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="wrong-answer">
-                                                    ✗ <?php echo htmlspecialchars($option['option_text']); ?>
-                                                </span>
-                                            <?php endif; ?>
-                                        </div>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Class</th>
+                                        <th>Subject</th>
+                                        <th>Event</th>
+                                        <th>Question</th>
+                                        <th>Options</th>
+                                        <th>Correct Option</th>
+                                        <th>Status</th>
+                                        <th style="min-width:120px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($quiz_data as $quiz_id => $quiz): ?>
+                                        <?php foreach ($quiz['questions'] as $question_id => $question): ?>
+                                            <tr>
+                                                <form method="POST" class="form-inline d-flex flex-wrap gap-2 align-items-center">
+                                                    <input type="hidden" name="id" value="<?= $quiz_id ?>">
+                                                    <td><input type="text" name="title" value="<?= htmlspecialchars($quiz['title']) ?>" class="form-control form-control-sm" readonly></td>
+                                                    <td>
+                                                        <select name="category_id" class="form-select form-select-sm" required>
+                                                            <option value="">Select Category</option>
+                                                            <?php while ($cat = $allCategories->fetch_assoc()): ?>
+                                                                <option value="<?= $cat['id'] ?>" <?= $quiz['category_id'] == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                                                            <?php endwhile; ?>
+                                                            <?php $allCategories->data_seek(0); ?>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="class_id" class="form-select form-select-sm">
+                                                            <option value="">None</option>
+                                                            <?php while ($class = $allClasses->fetch_assoc()): ?>
+                                                                <option value="<?= $class['id'] ?>" <?= $quiz['class_id'] == $class['id'] ? 'selected' : '' ?>><?= htmlspecialchars($class['name']) ?></option>
+                                                            <?php endwhile; ?>
+                                                            <?php $allClasses->data_seek(0); ?>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="subject_id" class="form-select form-select-sm">
+                                                            <option value="">None</option>
+                                                            <?php while ($subject = $allSubjects->fetch_assoc()): ?>
+                                                                <option value="<?= $subject['id'] ?>" <?= $quiz['subject_id'] == $subject['id'] ? 'selected' : '' ?>><?= htmlspecialchars($subject['name']) ?></option>
+                                                            <?php endwhile; ?>
+                                                            <?php $allSubjects->data_seek(0); ?>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="event_id" class="form-select form-select-sm">
+                                                            <option value="">None</option>
+                                                            <?php while ($event = $allEvents->fetch_assoc()): ?>
+                                                                <option value="<?= $event['id'] ?>" <?= $quiz['event_id'] == $event['id'] ? 'selected' : '' ?>><?= htmlspecialchars($event['name']) ?></option>
+                                                            <?php endwhile; ?>
+                                                            <?php $allEvents->data_seek(0); ?>
+                                                        </select>
+                                                    </td>
+                                                    <td><textarea name="question" class="form-control form-control-sm" rows="2"><?= htmlspecialchars($question['question_text']) ?></textarea></td>
+                                                    <td>
+                                                        <?php foreach ($question['options'] as $index => $option): ?>
+                                                            <input type="text" name="option_<?= chr(97 + $index) ?>" value="<?= htmlspecialchars($option['option_text']) ?>" class="form-control form-control-sm mb-1">
+                                                        <?php endforeach; ?>
+                                                    </td>
+                                                    <td>
+                                                        <select name="correct_option" class="form-select form-select-sm">
+                                                            <option value="a" <?= $question['options'][0]['is_correct'] ? 'selected' : '' ?>>A</option>
+                                                            <option value="b" <?= $question['options'][1]['is_correct'] ? 'selected' : '' ?>>B</option>
+                                                            <option value="c" <?= $question['options'][2]['is_correct'] ? 'selected' : '' ?>>C</option>
+                                                            <option value="d" <?= $question['options'][3]['is_correct'] ? 'selected' : '' ?>>D</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="status" class="form-select form-select-sm">
+                                                            <option value="active" <?= $quiz['status'] == 'active' ? 'selected' : '' ?>>Active</option>
+                                                            <option value="inactive" <?= $quiz['status'] == 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                                                        </select>
+                                                    </td>
+                                                    <td class="d-flex gap-2">
+                                                        <button type="submit" name="edit_quiz" class="btn btn-sm btn-success action-btn">Save</button>
+                                                </form>
+                                                        <form method="POST" onsubmit="return confirm('Delete this quiz?')" class="m-0">
+                                                            <input type="hidden" name="id" value="<?= $quiz_id ?>">
+                                                            <button type="submit" name="delete_quiz" class="btn btn-sm btn-danger action-btn">Delete</button>
+                                                        </form>
+                                                    </td>
+                                            </tr>
+                                        <?php endforeach; ?>
                                     <?php endforeach; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
-<!--  -->
-<!--  -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- PENDING QUESTIONS -->
-                    <!-- PENDING QUESTIONS -->
-<div class="tab-pane fade" id="pending_questions" role="tabpanel">
-    <h4>Pending Questions</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Submitted By</th>
-                    <th>Category</th>
-                    <th>Class</th>
-                    <th>Subject</th>
-                    <th>Event</th>
-                    <th>Question</th>
-                    <th>Option A</th>
-                    <th>Option B</th>
-                    <th>Option C</th>
-                    <th>Option D</th>
-                    <th>Correct Option</th>
-                    <th>Status</th>
-                    <th style="min-width:150px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $pending_questions->fetch_assoc()): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($row['display_name'] ?: 'Unknown') ?></td>
-                        <td><?= htmlspecialchars($row['category_name'] ?: 'None') ?></td>
-                        <td><?= htmlspecialchars($row['class_name'] ?: 'None') ?></td>
-                        <td><?= htmlspecialchars($row['subject_name'] ?: 'None') ?></td>
-                        <td><?= htmlspecialchars($row['event_name'] ?: 'None') ?></td>
-                        <td><textarea class="form-control form-control-sm" rows="2" readonly><?= htmlspecialchars($row['question']) ?></textarea></td>
-                        <td><input type="text" value="<?= htmlspecialchars($row['option_a']) ?>" class="form-control form-control-sm" readonly></td>
-                        <td><input type="text" value="<?= htmlspecialchars($row['option_b']) ?>" class="form-control form-control-sm" readonly></td>
-                        <td><input type="text" value="<?= htmlspecialchars($row['option_c']) ?>" class="form-control form-control-sm" readonly></td>
-                        <td><input type="text" value="<?= htmlspecialchars($row['option_d']) ?>" class="form-control form-control-sm" readonly></td>
-                        <td>
-                            <select class="form-select form-select-sm" disabled>
-                                <option value="a" <?= $row['correct_option'] == 'a' ? 'selected' : '' ?>>Option A</option>
-                                <option value="b" <?= $row['correct_option'] == 'b' ? 'selected' : '' ?>>Option B</option>
-                                <option value="c" <?= $row['correct_option'] == 'c' ? 'selected' : '' ?>>Option C</option>
-                                <option value="d" <?= $row['correct_option'] == 'd' ? 'selected' : '' ?>>Option D</option>
-                            </select>
-                        </td>
-                        <td><?= htmlspecialchars($row['status']) ?></td>
-                        <td class="d-flex gap-2">
-                            <?php if ($row['status'] == 'pending'): ?>
-                                <form method="POST" class="m-0">
-                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                    <button type="submit" name="approve_question" class="btn btn-sm btn-success action-btn">Approve</button>
-                                </form>
-                                <form method="POST" class="m-0">
-                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                    <button type="submit" name="reject_question" class="btn btn-sm btn-warning action-btn">Reject</button>
-                                </form>
-                            <?php endif; ?>
-                            <form method="POST" onsubmit="return confirm('Delete this pending question?')" class="m-0">
-                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                <button type="submit" name="delete_pending_question" class="btn btn-sm btn-danger action-btn">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+                    <div class="tab-pane fade" id="pending_questions" role="tabpanel">
+                        <h4>Pending Questions</h4>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Created By</th>
+                                        <th>Category</th>
+                                        <th>Class</th>
+                                        <th>Subject</th>
+                                        <th>Event</th>
+                                        <th>Question</th>
+                                        <th>Options</th>
+                                        <th>Correct Option</th>
+                                        <th>Status</th>
+                                        <th style="min-width:150px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while ($row = $pending_questions->fetch_assoc()): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($row['display_name']) ?></td>
+                                            <td><?= htmlspecialchars($row['category_name'] ?: 'N/A') ?></td>
+                                            <td><?= htmlspecialchars($row['class_name'] ?: 'N/A') ?></td>
+                                            <td><?= htmlspecialchars($row['subject_name'] ?: 'N/A') ?></td>
+                                            <td><?= htmlspecialchars($row['event_name'] ?: 'N/A') ?></td>
+                                            <td><?= htmlspecialchars($row['question']) ?></td>
+                                            <td>
+                                                A: <?= htmlspecialchars($row['option_a']) ?><br>
+                                                B: <?= htmlspecialchars($row['option_b']) ?><br>
+                                                C: <?= htmlspecialchars($row['option_c']) ?><br>
+                                                D: <?= htmlspecialchars($row['option_d']) ?>
+                                            </td>
+                                            <td><?= htmlspecialchars(strtoupper($row['correct_option'])) ?></td>
+                                            <td><?= htmlspecialchars($row['status']) ?></td>
+                                            <td class="d-flex gap-2">
+                                                <?php if ($row['status'] == 'pending'): ?>
+                                                    <form method="POST" class="m-0">
+                                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                        <button type="submit" name="approve_question" class="btn btn-sm btn-success action-btn">Approve</button>
+                                                    </form>
+                                                    <form method="POST" class="m-0">
+                                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                        <button type="submit" name="reject_question" class="btn btn-sm btn-warning action-btn">Reject</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                                <form method="POST" onsubmit="return confirm('Delete this pending question?')" class="m-0">
+                                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                    <button type="submit" name="delete_pending_question" class="btn btn-sm btn-danger action-btn">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-<script src="<?= settings()['root'] ?>assets/js/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    $(document).ready(function() {
-        /* get classes when category changes start  */
-        $("#aq_category_id").change(function() {
-            var category_id = $(this).val();
-            $("#aq_class_id").empty();
-            $.ajax({
-                url:"<?= settings()['adminpage'] ?>" + "ajax/get_classes.php",
-                method: "POST",
-                data: {
-                    cat_id: category_id
-                },
-                dataType: "json",
-                success: function(response) {
-                    response.data?.forEach(element => {
-                        $("#aq_class_id").append('<option value="' + element.id + '">' + element.name + '</option>');
-                        
+document.addEventListener('DOMContentLoaded', function() {
+    // Dynamic dropdown population for Add Quiz form
+    const categorySelect = document.getElementById('aq_category_id');
+    const classSelect = document.getElementById('aq_class_id');
+    const subjectSelect = document.getElementById('aq_subject_id');
+
+    if (categorySelect && classSelect && subjectSelect) {
+        categorySelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            classSelect.innerHTML = '<option value="">Select Class</option>';
+            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+
+            if (categoryId && categoryId !== '-1') {
+                fetch(`get_classes.php?category_id=${categoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(cls => {
+                            const option = document.createElement('option');
+                            option.value = cls.id;
+                            option.textContent = cls.name;
+                            classSelect.appendChild(option);
+                        });
                     });
-                }
-            });
+            }
         });
-        /* get classes when category changes end  */
-        /* get subjects when class changes start  */
-        $("#aq_class_id").change(function() {
-            var class_id = $(this).val();
-            $("#aq_subject_id").empty();
-            $.ajax({
-                url:"<?= settings()['adminpage'] ?>" + "ajax/get_subjects.php",
-                method: "POST",
-                data: {
-                    class_id: class_id
-                },
-                dataType: "json",
-                success: function(response) {
-                    response.data?.forEach(element => {
-                        $("#aq_subject_id").append('<option value="' + element.id + '">' + element.name + '</option>');
+
+        classSelect.addEventListener('change', function() {
+            const classId = this.value;
+            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+
+            if (classId) {
+                fetch(`get_subjects.php?class_id=${classId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(subject => {
+                            const option = document.createElement('option');
+                            option.value = subject.id;
+                            option.textContent = subject.name;
+                            subjectSelect.appendChild(option);
+                        });
                     });
-                }
-            });
+            }
         });
-        /* get subjects when class changes end  */
-    });
+    }
+});
 </script>
-<?php $conn->close(); ?>
 </body>
 </html>

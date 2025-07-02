@@ -1,40 +1,30 @@
 <?php
 if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+  session_start();
 }
-require __DIR__."/vendor/autoload.php";
+require __DIR__ . "/vendor/autoload.php";
 $db = new MysqliDb();
 $userid = $_SESSION['user_id'];
-$userinfo = $db->where('id', $userid)->getOne('users', array('id', 'username', 'email','first_name', 'last_name','phone', 'avatar'));
+$userinfo = $db->where('id', $userid)->getOne('users', array('id', 'username', 'email', 'first_name', 'last_name', 'phone', 'avatar'));
 require 'includes/header.php';
 ?>
 
 <style>
   .add-content-container {
     max-width: 1200px;
-    margin: 120px auto 80px auto; /* Increased top margin to prevent overlap with back button */
+    margin: 120px auto 80px auto;
+    /* Increased top margin to prevent overlap with back button */
     padding: 20px;
     position: relative;
   }
-  .back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    background-color: #3b82f6; /* Theme primary color */
-    border-color: #3b82f6;
-    color: white;
-  }
-  .back-button:hover {
-    background-color: #1e40af; /* Theme hover color */
-    border-color: #1e40af;
-  }
+
   .add-content-card {
     border: 1px solid #e0e7ff;
     border-radius: 8px;
     background-color: #f8fafc;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
   .add-content-card .card-header {
     background-color: #3b82f6;
     color: white;
@@ -42,25 +32,31 @@ require 'includes/header.php';
     padding: 15px;
     font-weight: 600;
   }
+
   .add-content-card .card-body {
     padding: 20px;
   }
+
   .add-content-card .form-label {
     font-weight: 500;
     color: #1e3a8a;
   }
+
   .add-content-card .form-control,
   .add-content-card .form-select {
     border-color: #bfdbfe;
   }
+
   .add-content-card .btn-primary {
     background-color: #2563eb;
     border-color: #2563eb;
   }
+
   .add-content-card .btn-primary:hover {
     background-color: #1e40af;
     border-color: #1e40af;
   }
+
   .request-card {
     border: 1px solid #e0e7ff;
     border-radius: 8px;
@@ -68,6 +64,7 @@ require 'includes/header.php';
     padding: 15px;
     margin-bottom: 15px;
   }
+
   .request-card .icon-container {
     width: 40px;
     height: 40px;
@@ -79,17 +76,21 @@ require 'includes/header.php';
     margin-right: 15px;
     float: left;
   }
+
   .request-card .icon-container i {
     color: #1e3a8a;
   }
+
   .request-card h5 {
     margin: 0;
     color: #1e3a8a;
   }
+
   .request-card p {
     margin: 5px 0;
     color: #4b5563;
   }
+
   .request-card .timestamp,
   .request-card .status {
     font-size: 0.9em;
@@ -98,9 +99,7 @@ require 'includes/header.php';
 </style>
 
 <div class="add-content-container">
-  <button class="btn back-button" onclick="history.back()">
-    <i class="fas fa-arrow-left me-2"></i> Back
-  </button>
+
 
   <ul class="nav nav-tabs mb-4" id="addContentTab" role="tablist">
     <li class="nav-item" role="presentation">
@@ -307,8 +306,8 @@ require 'includes/header.php';
       requestData.option3 = document.getElementById("quizOption3").value;
       requestData.option4 = document.getElementById("quizOption4").value;
       requestData.correctAnswer = document.getElementById("quizCorrectAnswer").value;
-      if (!requestData.title || !requestData.question || !requestData.option1 || 
-          !requestData.option2 || !requestData.option3 || !requestData.option4) {
+      if (!requestData.title || !requestData.question || !requestData.option1 ||
+        !requestData.option2 || !requestData.option3 || !requestData.option4) {
         alert("Please fill in all quiz fields.");
         return;
       }
@@ -320,7 +319,7 @@ require 'includes/header.php';
       requestData.date = document.getElementById("eventDate").value;
       requestData.eventType = document.getElementById("eventType").value;
       const imageFile = document.getElementById("eventImage").files[0];
-      
+
       if (!requestData.title || !requestData.description || !requestData.date) {
         alert("Please fill in all required event fields.");
         return;
@@ -330,22 +329,22 @@ require 'includes/header.php';
         // In a real application, handle file upload to server
         formData.append('type', 'Event');
         fetch('/api/upload-event-image', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            requestData.imagePath = data.imagePath;
-            saveRequest(requestData);
-          } else {
-            alert("Image upload failed: " + data.message);
-          }
-        })
-        .catch(error => {
-          console.error('Error uploading image:', error);
-          alert("An error occurred while uploading the image.");
-        });
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              requestData.imagePath = data.imagePath;
+              saveRequest(requestData);
+            } else {
+              alert("Image upload failed: " + data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error uploading image:', error);
+            alert("An error occurred while uploading the image.");
+          });
         return; // Exit to wait for async image upload
       } else {
         requestData.imagePath = null;
@@ -461,4 +460,5 @@ require 'includes/header.php';
   }
 </script>
 </body>
+
 </html>

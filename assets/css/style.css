@@ -26,6 +26,7 @@ body {
 
 .hero {
     background: url('https://source.unsplash.com/random/1920x600/?education') no-repeat center center/cover;
+
     padding: 5rem 0;
     color: white;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -47,7 +48,8 @@ body {
     color: white;
 }
 
-.btn-primary, .btn-outline-primary {
+.btn-primary,
+.btn-outline-primary {
     border-radius: 50px;
     padding: 0.5rem 1.5rem;
     font-weight: 500;
@@ -97,3 +99,4 @@ body {
     border-width: 1px 0;
     box-shadow: inset 0 0.5em 1.5em rgba(0, 0, 0, 0.1), inset 0 0.125em 0.5em rgba(0, 0, 0, 0.15);
 }
+

@@ -1,4 +1,6 @@
 <?php
+require __DIR__."/../vendor/autoload.php";
+require __DIR__."/admincheck.php";
 $host = "localhost";
 $user = "root";
 $pass = "";

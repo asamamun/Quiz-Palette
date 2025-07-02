@@ -1,9 +1,10 @@
 <?php include "includes/header.php"?>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/contact.css">
-
 
     <!-- Contact Form Section -->
     <section class="contact-section py-5">
@@ -42,8 +43,7 @@
                                 </div>
                                 
                                 <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="subscribe" name="subscribe" style="accent-color: #096b6bdd;">
-
+                                    <input type="checkbox" class="form-check-input" id="subscribe" name="subscribe" style="accent-color: #096b6bdd;">
                                     <label class="form-check-label" for="subscribe">Subscribe to our newsletter</label>
                                 </div>
                                 
@@ -51,7 +51,6 @@
                                     <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
                                 </div>
                                 <div id="formResponse" class="d-none alert alert-success mt-3"></div>
-
                             </form>
                         </div>
                     </div>
@@ -82,15 +81,75 @@
                     <div class="contact-icon">
                         <i class="fas fa-envelope fa-3x mb-3"></i>
                         <h4>Email</h4>
-                        <p>info@quizmaster.com<br>support@quizmaster.com</p>
+                        <p>info@quizpallete.com<br>support@quizpallete.com</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-icon">
+                        <i class="fab fa-twitter fa-3x mb-3"></i>
+                        <h4>Social Media</h4>
+                        <p>Follow us on Twitter</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Custom JS -->
-    <script src="js/contact.js"></script>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Basic client-side validation
+            const form = this;
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            // Get form data
+            const formData = new FormData(form);
+
+            // Send AJAX request
+            fetch('process_contact.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'Submitted') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Message Sent!',
+                        text: 'Thank you for your message. We will get back to you soon.',
+                        confirmButtonColor: '#096b6b',
+                    }).then(() => {
+                        form.reset(); // Reset form after success
+                        form.classList.remove('was-validated');
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong! Please try again.',
+                        confirmButtonColor: '#096b6b',
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'An error occurred while sending your message.',
+                    confirmButtonColor: '#096b6b',
+                });
+            });
+        });
+    </script>
 </body>
 </html>
+<?php include "includes/footer.php" ?>

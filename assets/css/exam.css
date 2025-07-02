@@ -121,7 +121,7 @@ body {
     transition: transform 0.3s ease;
 }
 
-.menu-item:hover, 
+.menu-item:hover,
 .menu-item.active {
     background-color: rgba(255, 255, 255, 0.15);
 }
@@ -152,7 +152,7 @@ body {
 .menu-item:hover .icon,
 .menu-item.active .icon {
     transform: scale(1.1);
-    
+
 }
 
 /* Content Area Styles (unchanged from your original) */
@@ -254,17 +254,17 @@ body {
         height: auto;
         overflow: visible;
     }
-    
+
     .sidebar {
         border-right: none;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
-    
+
     .icon-container {
         padding: 15px;
         min-width: 70px;
     }
-    
+
     .card-body {
         padding: 15px;
     }
